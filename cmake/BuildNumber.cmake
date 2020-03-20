@@ -1,0 +1,7 @@
+macro(init_build_number)
+    if(NOT BUILD_NUMBER)
+        set(BUILD_NUMBER "")
+    else()
+        set(BUILD_NUMBER ".${BUILD_NUMBER}")
+    endif()
+endmacro()
