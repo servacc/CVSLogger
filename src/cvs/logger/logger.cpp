@@ -32,7 +32,7 @@ ChannalPtr Logger::getLogger(const std::string& name) {
 }
 
 std::filesystem::path Logger::logDir(std::filesystem::path path) {
-  static auto file_dir = fs::current_path() / "log.txt";
+  static auto file_dir = fs::temp_directory_path() / "log.txt";
   if (!path.empty())
     file_dir = path;
 
