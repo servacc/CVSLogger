@@ -1,13 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
 
 include(cmake/GitHelpers.cmake)
-include(cmake/BuildNumber.cmake)
 
-init_build_number()
 git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 
 project(cvslogger
-    VERSION 0.1.${GIT_COUNT}${BUILD_NUMBER}
+    VERSION 0.1.${GIT_COUNT}
     DESCRIPTION "CVS logger library (${REV_ID})")
 
 option(CVSLOGGER_TESTS "" OFF)
