@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
+include(GNUInstallDirs)
 include(cmake/GitHelpers.cmake)
 
 git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
@@ -74,3 +75,11 @@ if(CVSLOGGER_TESTS)
 
     add_subdirectory(test)
 endif()
+
+install(TARGETS ${PROJECT_NAME} spdlog EXPORT CVSLoggerTargets
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+                COMPONENT   bin
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+                COMPONENT   bin
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CVSLogger/ver-${PROJECT_VERSION_MAJOR}
+    )
