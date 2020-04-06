@@ -6,7 +6,7 @@ include(cmake/GitHelpers.cmake)
 git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 
 project(cvslogger
-    VERSION 0.1.${GIT_COUNT}
+    VERSION 0.2.${GIT_COUNT}
     DESCRIPTION "CVS logger library (${REV_ID})")
 
 option(CVSLOGGER_TESTS "" OFF)
