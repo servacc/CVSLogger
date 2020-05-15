@@ -8,7 +8,7 @@ git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 message(WARNING "TODO: Installing developer components has not been tested.")
 
 project(cvslogger
-    VERSION 0.2.${GIT_COUNT}
+    VERSION 0.3.${GIT_COUNT}
     DESCRIPTION "CVS logger library (${REV_ID})")
 
 option(CVSLOGGER_TESTS "" OFF)
