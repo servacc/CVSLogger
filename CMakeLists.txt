@@ -5,16 +5,20 @@ include(cmake/GitHelpers.cmake)
 
 git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 
+message(WARNING "TODO: Installing developer components has not been tested.")
+
 project(cvslogger
-    VERSION 0.2.${GIT_COUNT}
+    VERSION 0.3.${GIT_COUNT}
     DESCRIPTION "CVS logger library (${REV_ID})")
 
 option(CVSLOGGER_TESTS "" OFF)
 option(CVSLOGGER_OPENCV_IMG "" OFF)
 
+option(CVSLOGGER_DEV_INSTALL "" OFF)
+
 include(GenerateExportHeader)
 
-set(SPDLOG_BUILD_SHARED ON  CACHE BOOL "" FORCE)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(thirdparty/spdlog)
 
 if(CVSLOGGER_OPENCV_IMG)
@@ -22,8 +26,8 @@ if(CVSLOGGER_OPENCV_IMG)
 endif()
 
 file( GLOB SRCS
-        src/cvs/logger/logger.h
-        src/cvs/logger/logger.cpp
+        include/cvs/logger/logger.h
+        src/logger.cpp
     )
 
 add_library(${PROJECT_NAME} SHARED)
@@ -47,20 +51,13 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/export>
-#        $<INSTALL_INTERFACE:${INCLUDE_LOCATION}>
     )
 
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC
         $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:CVS_LOGGER_OPENCV_ENABLED>
-    )
-
-
-target_compile_features(${PROJECT_NAME}
-    PUBLIC
-        cxx_std_20
     )
 
 set_target_properties(${PROJECT_NAME}
@@ -83,3 +80,10 @@ install(TARGETS ${PROJECT_NAME} spdlog EXPORT CVSLoggerTargets
                 COMPONENT   bin
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CVSLogger/ver-${PROJECT_VERSION_MAJOR}
     )
+
+if(CVSLOGGER_DEV_INSTALL)
+    install(FILES       include/cvs/logger/logger.h
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CVSLogger/ver-${PROJECT_VERSION_MAJOR}
+            COMPONENT   dev
+            PERMISSIONS OWNER_READ GROUP_READ)
+endif()

@@ -25,6 +25,8 @@ enum class Level {
 
 enum class TimeType { local = 0, utc };
 
+enum class LogImage { disable = 0, enable };
+
 using ChannalPtr = std::shared_ptr<class Logger>;
 
 class CVSLOGGER_EXPORT Logger {
@@ -136,14 +138,16 @@ class CVSLOGGER_EXPORT Logger {
 
   static spdlog::level::level_enum default_level;
 
+  // FIXME: When calling getLogger, the wrapper is created with the default state (all fields of the
+  // class Logger are created with the default value).
   bool log_in_file = false;
 
 #ifdef CVS_LOGGER_OPENCV_ENABLED
  public:
-  void setImageLogEnable(bool);
+  void setLogImage(LogImage);
   void setImageExtension(const std::string&);
 
-  bool isImageLogEnable() const;
+  LogImage logImage() const;
 
   void log(Level level, const char* name, const cv::Mat& img);
   void log(Level level, const std::string& name, const cv::Mat& img);
@@ -151,10 +155,10 @@ class CVSLOGGER_EXPORT Logger {
  private:
   std::unordered_map<std::string, std::size_t> counters;
 
-  bool        image_log = false;
+  LogImage    image_log = LogImage::disable;
   std::string image_ext = "png";
 
-  std::filesystem::path img_dir;
+  std::filesystem::path img_dir = logDir().remove_filename();
 #endif
 };
 

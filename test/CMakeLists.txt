@@ -14,3 +14,8 @@ target_link_libraries(${PROJECT_NAME}
         gtest_main
         cvslogger
     )
+
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+        CXX_STANDARD 20
+    )
