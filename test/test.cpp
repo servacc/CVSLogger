@@ -6,6 +6,8 @@ using namespace cvs::logger;
 
 namespace {
 
+TEST(CVSLoggerTest, config) { Logger::configure("test-log-1", Level::trace); }
+
 TEST(CVSLoggerTest, glogal_logger) {
   Logger::configure(Level::trace);
 
