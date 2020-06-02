@@ -13,6 +13,9 @@
 
 namespace cvs::logger {
 
+class LoggerName : public std::string_view {};
+class Pattern : public std::string_view {};
+
 enum class Level {
   trace    = 0,
   debug    = 1,
@@ -27,35 +30,35 @@ enum class TimeType { local = 0, utc };
 
 enum class LogImage { disable = 0, enable };
 
-using ChannalPtr = std::shared_ptr<class Logger>;
+using LoggerPtr = std::shared_ptr<class Logger>;
 
 class CVSLOGGER_EXPORT Logger {
  public:
-  static ChannalPtr getLogger(const std::string&);
+  static LoggerPtr getLogger(std::string_view);
 
   template <typename... Args>
   static void configure(Args...) {}
 
   template <typename... Args>
-  static void configure(const char* name, Args... args) {
+  static void configure(LoggerName name, Args... args) {
     auto logger = getLogger(name);
     configure(logger, args...);
   }
 
   template <typename Ptr, typename... Args>
-  static void configure(const ChannalPtr& logger, Level level, Args... args) {
+  static void configure(const LoggerPtr& logger, Level level, Args... args) {
     logger->setLevel(level);
     configure(logger, args...);
   }
 
   template <typename... Args>
-  static void configure(const ChannalPtr& logger, const std::string& pattern, Args... args) {
-    logger->setPattern(pattern);
+  static void configure(const LoggerPtr& logger, Pattern pattern, Args... args) {
+    logger->setPattern(std::string(pattern));
     configure(logger, args...);
   }
 
   template <typename... Args>
-  static void configure(const ChannalPtr&  logger,
+  static void configure(const LoggerPtr&   logger,
                         const std::string& pattern,
                         TimeType           time_type,
                         Args... args) {
@@ -70,14 +73,14 @@ class CVSLOGGER_EXPORT Logger {
   }
 
   template <typename... Args>
-  static void configure(std::string pattern, Args... args) {
-    Logger::setPatternGlobal(std::move(pattern));
+  static void configure(Pattern pattern, Args... args) {
+    Logger::setPatternGlobal(std::string(pattern));
     configure(args...);
   }
 
   template <typename... Args>
-  static void configure(std::string pattern, TimeType time_type, Args... args) {
-    Logger::setPatternGlobal(std::move(pattern), time_type);
+  static void configure(Pattern pattern, TimeType time_type, Args... args) {
+    Logger::setPatternGlobal(std::string(pattern), time_type);
     configure(args...);
   }
 

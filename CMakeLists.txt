@@ -67,8 +67,10 @@ set_target_properties(${PROJECT_NAME}
     )
 
 if(CVSLOGGER_TESTS)
-    add_subdirectory(thirdparty/googletest)
-    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    if(NOT TARGET gtest)
+        add_subdirectory(thirdparty/googletest)
+        set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    endif()
 
     add_subdirectory(test)
 endif()

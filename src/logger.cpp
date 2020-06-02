@@ -21,10 +21,10 @@ std::shared_ptr<spdlog::logger> Logger::createLogger(std::string name) {
   return std::move(logger);
 }
 
-ChannalPtr Logger::getLogger(const std::string& name) {
-  auto logger = spdlog::get(name);
+LoggerPtr Logger::getLogger(std::string_view name) {
+  auto logger = spdlog::get(std::string(name));
   if (!logger) {
-    logger = createLogger(name);
+    logger = createLogger(std::string(name));
     spdlog::register_logger(logger);
   }
 
