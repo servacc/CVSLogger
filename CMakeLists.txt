@@ -21,6 +21,9 @@ include(GenerateExportHeader)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(thirdparty/spdlog)
 
+find_package(PkgConfig)
+pkg_check_modules(PC_SYSTEMD QUIET libsystemd)
+
 if(CVSLOGGER_OPENCV_IMG)
     find_package(OpenCV REQUIRED)
 endif()
@@ -47,12 +50,15 @@ target_link_libraries(${PROJECT_NAME}
         spdlog::spdlog
         $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_core>
         $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_imgcodecs>
+        systemd
     )
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/export>
+    PRIVATE
+        ${PC_SYSTEMD_INCLUDE_DIRS}
     )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -67,8 +73,10 @@ set_target_properties(${PROJECT_NAME}
     )
 
 if(CVSLOGGER_TESTS)
-    add_subdirectory(thirdparty/googletest)
-    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    if(NOT TARGET gtest)
+        add_subdirectory(thirdparty/googletest)
+        set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+    endif()
 
     add_subdirectory(test)
 endif()
