@@ -4,9 +4,29 @@
 
 using namespace cvs::logger;
 
+using namespace cvs::logger::literals;
+
 namespace {
 
-TEST(CVSLoggerTest, config) { Logger::configure("test-log-1", Level::trace); }
+TEST(CVSLoggerTest, config_trace) {
+  Logger::configure(LoggerName("config_trace-0"), Level::trace);
+  auto logger0 = Logger::getLogger("config_trace-0");
+
+  LOG_TRACE(logger0, "Test trace.");
+  LOG_DEBUG(logger0, "Test debug.");
+  LOG_INFO(logger0, "Test info.");
+
+  Logger::configure("config_trace-1"_name, Level::trace, "*** %v ***"_pattern);
+
+  auto logger1 = Logger::getLogger("config_trace-1");
+
+  LOG_TRACE(logger1, "Test trace.");
+  LOG_DEBUG(logger1, "Test debug.");
+  LOG_INFO(logger1, "Test info.");
+
+  // There must be a compilation error.
+  //  Logger::configure("config_trace-2", Level::trace);
+}
 
 TEST(CVSLoggerTest, glogal_logger) {
   Logger::configure(Level::trace);

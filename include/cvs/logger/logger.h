@@ -13,8 +13,43 @@
 
 namespace cvs::logger {
 
-class LoggerName : public std::string_view {};
-class Pattern : public std::string_view {};
+class LoggerName : public std::string_view {
+ public:
+  constexpr explicit LoggerName(const std::string_view& other) noexcept
+      : std::string_view(other) {}
+  constexpr explicit LoggerName(const char* s, size_type count)
+      : std::string_view(s, count) {}
+  constexpr explicit LoggerName(const char* s)
+      : std::string_view(s) {}
+};
+
+class LoggerPattern : public std::string_view {
+ public:
+  constexpr explicit LoggerPattern(const std::string_view& other) noexcept
+      : std::string_view(other) {}
+  constexpr explicit LoggerPattern(const char* s, size_type count)
+      : std::string_view(s, count) {}
+  constexpr explicit LoggerPattern(const char* s)
+      : std::string_view(s) {}
+};
+
+namespace literals {
+
+template <typename CharT, CharT... String>
+constexpr LoggerName operator"" _name() {
+  constexpr const char value[sizeof...(String) + 1] = {String...};
+  constexpr int        size                         = sizeof...(String);
+  return LoggerName(value, size);
+}
+
+template <typename CharT, CharT... String>
+constexpr LoggerPattern operator"" _pattern() {
+  constexpr const char value[sizeof...(String) + 1] = {String...};
+  constexpr int        size                         = sizeof...(String);
+  return LoggerPattern(value, size);
+}
+
+}  // namespace literals
 
 enum class Level {
   trace    = 0,
@@ -36,8 +71,8 @@ class CVSLOGGER_EXPORT Logger {
  public:
   static LoggerPtr getLogger(std::string_view);
 
-  template <typename... Args>
-  static void configure(Args...) {}
+  static void configure(const LoggerPtr&) {}
+  static void configure() {}
 
   template <typename... Args>
   static void configure(LoggerName name, Args... args) {
@@ -45,14 +80,14 @@ class CVSLOGGER_EXPORT Logger {
     configure(logger, args...);
   }
 
-  template <typename Ptr, typename... Args>
+  template <typename... Args>
   static void configure(const LoggerPtr& logger, Level level, Args... args) {
     logger->setLevel(level);
     configure(logger, args...);
   }
 
   template <typename... Args>
-  static void configure(const LoggerPtr& logger, Pattern pattern, Args... args) {
+  static void configure(const LoggerPtr& logger, LoggerPattern pattern, Args... args) {
     logger->setPattern(std::string(pattern));
     configure(logger, args...);
   }
@@ -73,24 +108,16 @@ class CVSLOGGER_EXPORT Logger {
   }
 
   template <typename... Args>
-  static void configure(Pattern pattern, Args... args) {
+  static void configure(LoggerPattern pattern, Args... args) {
     Logger::setPatternGlobal(std::string(pattern));
     configure(args...);
   }
 
   template <typename... Args>
-  static void configure(Pattern pattern, TimeType time_type, Args... args) {
+  static void configure(LoggerPattern pattern, TimeType time_type, Args... args) {
     Logger::setPatternGlobal(std::string(pattern), time_type);
     configure(args...);
   }
-
-  template <typename... Args>
-  static void configure(std::filesystem::path log_dir, Args... args) {
-    logDir(std::move(log_dir));
-    configure(args...);
-  }
-
-  static std::filesystem::path logDir(std::filesystem::path = {});
 
   Logger(std::shared_ptr<spdlog::logger> logger);
   ~Logger();
@@ -102,7 +129,6 @@ class CVSLOGGER_EXPORT Logger {
   Logger& operator=(Logger&) = delete;
 
   void setLevel(Level);
-  void setFileSinkEnable(bool);
   void setPattern(std::string, TimeType = TimeType::local);
 
   bool isEnabled(Level) const;
@@ -141,12 +167,10 @@ class CVSLOGGER_EXPORT Logger {
 
   static spdlog::level::level_enum default_level;
 
-  // FIXME: When calling getLogger, the wrapper is created with the default state (all fields of the
-  // class Logger are created with the default value).
-  bool log_in_file = false;
-
 #ifdef CVS_LOGGER_OPENCV_ENABLED
  public:
+  static void setImgDir(std::filesystem::path);
+
   void setLogImage(LogImage);
   void setImageExtension(const std::string&);
 
@@ -161,7 +185,7 @@ class CVSLOGGER_EXPORT Logger {
   LogImage    image_log = LogImage::disable;
   std::string image_ext = "png";
 
-  std::filesystem::path img_dir = logDir().remove_filename();
+  static std::filesystem::path img_dir;
 #endif
 };
 
