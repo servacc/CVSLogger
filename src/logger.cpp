@@ -2,8 +2,8 @@
 
 #include <filesystem>
 
-#include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/sinks/systemd_sink.h>
 
 namespace fs = std::filesystem;
 
@@ -14,29 +14,21 @@ spdlog::level::level_enum Logger::default_level = spdlog::level::level_enum::inf
 std::shared_ptr<spdlog::logger> Logger::createLogger(std::string name) {
   std::vector<spdlog::sink_ptr> sinks;
   sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
-  sinks.push_back(std::make_shared<spdlog::sinks::basic_file_sink_mt>(Logger::logDir().string()));
+  sinks.push_back(std::make_shared<spdlog::sinks::systemd_sink_mt>());
 
   auto logger = std::make_unique<spdlog::logger>(name, std::begin(sinks), std::end(sinks));
   logger->set_level(Logger::default_level);
   return std::move(logger);
 }
 
-ChannalPtr Logger::getLogger(const std::string& name) {
-  auto logger = spdlog::get(name);
+LoggerPtr Logger::getLogger(std::string_view name) {
+  auto logger = spdlog::get(std::string(name));
   if (!logger) {
-    logger = createLogger(name);
+    logger = createLogger(std::string(name));
     spdlog::register_logger(logger);
   }
 
   return std::make_shared<Logger>(std::move(logger));
-}
-
-std::filesystem::path Logger::logDir(std::filesystem::path path) {
-  static auto file_dir = fs::temp_directory_path() / "log.txt";
-  if (!path.empty())
-    file_dir = path;
-
-  return file_dir;
 }
 
 void Logger::initDefaultLogger() {
@@ -91,20 +83,7 @@ void Logger::setPattern(std::string pattern, TimeType tt) {
 
 bool Logger::isEnabled(Level level) const { return logger->should_log(convertLogLevel(level)); }
 
-void Logger::setLevel(Level level) {
-  logger->set_level(convertLogLevel(level));
-  setFileSinkEnable(log_in_file);
-}
-
-void Logger::setFileSinkEnable(bool enable) {
-  log_in_file = enable;
-  for (auto& s : logger->sinks()) {
-    auto f_sink = std::dynamic_pointer_cast<spdlog::sinks::basic_file_sink_mt>(s);
-    if (f_sink) {
-      f_sink->set_level(log_in_file ? logger->level() : convertLogLevel(Level::off));
-    }
-  }
-}
+void Logger::setLevel(Level level) { logger->set_level(convertLogLevel(level)); }
 
 }  // namespace cvs::logger
 
@@ -113,6 +92,18 @@ void Logger::setFileSinkEnable(bool enable) {
 #include <opencv2/highgui/highgui.hpp>
 
 namespace cvs::logger {
+
+std::filesystem::path Logger::img_dir = std::filesystem::temp_directory_path();
+
+void Logger::setImgDir(std::filesystem::path p) {
+  img_dir = p;
+  if (!fs::exists(img_dir)) {
+    std::error_code ec;
+    if (!fs::create_directories(img_dir, ec))
+      LOG_GLOB_CRITICAL("Unable to create log directories {}. {} ({}).", img_dir.string(),
+                        ec.message(), ec.value());
+  }
+}
 
 void Logger::setImageExtension(const std::string& ext) { image_ext = ext; }
 void Logger::setLogImage(LogImage enable) { image_log = enable; }
