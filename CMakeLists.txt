@@ -11,12 +11,21 @@ project(cvslogger
     VERSION 1.0.${GIT_COUNT}
     DESCRIPTION "CVS logger library (${REV_ID})")
 
+option(CVSLOGGER_SHARED "" ON)
 option(CVSLOGGER_TESTS "" OFF)
 option(CVSLOGGER_OPENCV_IMG "" OFF)
 
+option(CVSLOGGER_INSTALL "" OFF)
 option(CVSLOGGER_DEV_INSTALL "" OFF)
 
 include(GenerateExportHeader)
+
+if(CVSLOGGER_SHARED)
+    set(LIB_TYPE SHARED)
+else()
+    set(LIB_TYPE STATIC)
+endif()
+
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(thirdparty/spdlog)
@@ -33,7 +42,7 @@ file( GLOB SRCS
         src/logger.cpp
     )
 
-add_library(${PROJECT_NAME} SHARED)
+add_library(${PROJECT_NAME} ${LIB_TYPE})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
@@ -79,19 +88,4 @@ if(CVSLOGGER_TESTS)
     endif()
 
     add_subdirectory(test)
-endif()
-
-install(TARGETS ${PROJECT_NAME} spdlog EXPORT CVSLoggerTargets
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-                COMPONENT   bin
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-                COMPONENT   bin
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CVSLogger/ver-${PROJECT_VERSION_MAJOR}
-    )
-
-if(CVSLOGGER_DEV_INSTALL)
-    install(FILES       include/cvs/logger/logger.h
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/CVSLogger/ver-${PROJECT_VERSION_MAJOR}
-            COMPONENT   dev
-            PERMISSIONS OWNER_READ GROUP_READ)
 endif()
