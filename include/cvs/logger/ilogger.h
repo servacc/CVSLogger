@@ -14,13 +14,20 @@ class CVSLOGGER_EXPORT ILogger {
  public:
   virtual ~ILogger() = default;
 
-  virtual Level                        level() const = 0;
-  virtual const std::filesystem::path& path() const  = 0;
+  virtual std::string_view             name() const     = 0;
+  virtual Level                        level() const    = 0;
+  virtual const std::filesystem::path& path() const     = 0;
+  virtual LogImage                     logImage() const = 0;
 
   virtual bool isEnabled(Level) const = 0;
 
   template <typename T>
-  auto processArg(Level, const T& arg) {
+  struct Strategy {
+    using Type = T;
+  };
+
+  template <typename T>
+  typename Strategy<T>::Type processArg(Level, const T& arg) {
     return arg;
   }
 
@@ -69,3 +76,22 @@ class CVSLOGGER_EXPORT ILogger {
 };
 
 }  // namespace cvs::logger
+
+#ifdef CVS_LOGGER_OPENCV_ENABLED
+
+#include <atomic>
+#include <opencv2/highgui/highgui.hpp>
+
+namespace cvs::logger {
+
+template <>
+struct ILogger::Strategy<cv::Mat> {
+  using Type = std::string;
+};
+
+template <>
+ILogger::Strategy<cv::Mat>::Type ILogger::processArg<cv::Mat>(Level l, const cv::Mat& arg);
+
+}  // namespace cvs::logger
+
+#endif

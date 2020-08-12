@@ -6,8 +6,8 @@ add_executable(${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-#        test.cpp
         factory_test.cpp
+        $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_test.cpp>
     )
 
 target_link_libraries(${PROJECT_NAME}

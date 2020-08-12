@@ -10,11 +10,12 @@ namespace cvs::logger {
 
 class DefaultLoggerFactory : public LoggerFactory {
   struct LogConf {
-    std::optional<Level>                 level;
-    std::optional<std::string>           pattern;
-    std::optional<TimeType>              time_type;
-    std::optional<std::filesystem::path> path;
-    std::optional<Sinks>                 sinks;
+    std::optional<Level>       level;
+    std::optional<std::string> pattern;
+    std::optional<TimeType>    time_type;
+    std::filesystem::path      path = std::filesystem::temp_directory_path();
+    std::optional<Sinks>       sinks;
+    std::optional<LogImage>    log_image;
   };
 
  protected:

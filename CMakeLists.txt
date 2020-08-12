@@ -50,6 +50,7 @@ file( GLOB SRCS
         src/defaultfactory.cpp
         src/configtypes.cpp
         src/loggerfactory.cpp
+        src/ilogger.cpp
     )
 
 add_library(${PROJECT_NAME} ${LIB_TYPE})

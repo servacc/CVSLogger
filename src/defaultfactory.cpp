@@ -55,15 +55,21 @@ class DefaultLogger : public ILogger {
   DefaultLogger(std::shared_ptr<spdlog::logger> ptr)
       : ILogger(std::move(ptr)) {}
 
+  std::string_view name() const override;
+  LogImage         logImage() const override;
+
   Level                        level() const override;
   const std::filesystem::path& path() const override;
 
   bool isEnabled(Level) const override;
 
-  std::filesystem::path p;
+  std::filesystem::path p         = std::filesystem::temp_directory_path();
+  LogImage              log_image = LogImage::disable;
 };
 
-Level DefaultLogger::level() const { return convertLogLevel(logger->level()); }
+std::string_view DefaultLogger::name() const { return logger->name(); }
+LogImage         DefaultLogger::logImage() const { return log_image; }
+Level            DefaultLogger::level() const { return convertLogLevel(logger->level()); }
 const std::filesystem::path& DefaultLogger::path() const { return p; }
 bool DefaultLogger::isEnabled(Level l) const { return logger->should_log(convertLogLevel(l)); }
 
@@ -86,6 +92,8 @@ void DefaultLoggerFactory::configureImpl(Regex ptrn, std::any val) {
     config_cache[re_ptrn].path = std::any_cast<std::filesystem::path>(val);
   else if (val.type() == typeid(Sinks))
     config_cache[re_ptrn].sinks = std::any_cast<Sinks>(val);
+  else if (val.type() == typeid(LogImage))
+    config_cache[re_ptrn].log_image = std::any_cast<LogImage>(val);
 }
 
 void DefaultLoggerFactory::configureImpl() {
@@ -114,8 +122,10 @@ void DefaultLoggerFactory::configureLogger(const LoggerPtr& logger, const LogCon
         def_logger->logger->set_pattern(config.pattern.value());
     }
 
-    if (config.path)
-      def_logger->p = config.path.value();
+    def_logger->p = config.path;
+
+    if (config.log_image)
+      def_logger->log_image = config.log_image.value();
 
     if (config.sinks) {
       auto sinks_flags = config.sinks.value();
