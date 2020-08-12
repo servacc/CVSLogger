@@ -8,7 +8,7 @@ git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 message(WARNING "TODO: Installing developer components has not been tested.")
 
 project(cvslogger
-    VERSION 1.1.${GIT_COUNT}
+    VERSION 2.0.${GIT_COUNT}
     DESCRIPTION "CVS logger library (${REV_ID})")
 
 option(CVSLOGGER_SHARED "" ON)
@@ -17,6 +17,9 @@ option(CVSLOGGER_OPENCV_IMG "" OFF)
 
 option(CVSLOGGER_INSTALL "" OFF)
 option(CVSLOGGER_DEV_INSTALL "" OFF)
+
+option(CVSLOGGER_ENABLE_STD_BY_DEFAULT "Enable stdout sink by default" OFF)
+option(CVSLOGGER_ENABLE_SYSD_BY_DEFAULT "Enable systemd sink by default" ON)
 
 include(GenerateExportHeader)
 
@@ -38,8 +41,16 @@ if(CVSLOGGER_OPENCV_IMG)
 endif()
 
 file( GLOB SRCS
-        include/cvs/logger/logger.h
-        src/logger.cpp
+        include/cvs/logger/logging.h
+        include/cvs/logger/ilogger.h
+        include/cvs/logger/loggerfactory.h
+        include/cvs/logger/configtypes.h
+        include/cvs/logger/defaultfactory.h
+
+        src/defaultfactory.cpp
+        src/configtypes.cpp
+        src/loggerfactory.cpp
+        src/ilogger.cpp
     )
 
 add_library(${PROJECT_NAME} ${LIB_TYPE})
@@ -73,6 +84,9 @@ target_include_directories(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC
         $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:CVS_LOGGER_OPENCV_ENABLED>
+        $<$<BOOL:${CVSLOGGER_ENABLE_STD_BY_DEFAULT}>:CVSLOGGER_STD_ENABLED>
+        $<$<BOOL:${CVSLOGGER_ENABLE_SYSD_BY_DEFAULT}>:CVSLOGGER_SYSD_ENABLED>
+
     )
 
 set_target_properties(${PROJECT_NAME}
