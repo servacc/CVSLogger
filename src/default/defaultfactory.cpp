@@ -1,4 +1,4 @@
-#include "../include/cvs/logger/defaultfactory.h"
+#include "defaultfactory.h"
 #include "../include/cvs/logger/ilogger.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>

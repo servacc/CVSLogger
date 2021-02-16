@@ -45,9 +45,10 @@ file( GLOB SRCS
         include/cvs/logger/ilogger.h
         include/cvs/logger/loggerfactory.h
         include/cvs/logger/configtypes.h
-        include/cvs/logger/defaultfactory.h
 
-        src/defaultfactory.cpp
+        src/default/defaultfactory.h
+
+        src/default/defaultfactory.cpp
         src/configtypes.cpp
         src/loggerfactory.cpp
         src/ilogger.cpp
