@@ -44,13 +44,13 @@ if(CVSLOGGER_OPENCV_IMG)
 endif()
 
 file( GLOB SRCS
-        include/cvs/logger/logging.h
-        include/cvs/logger/ilogger.h
-        include/cvs/logger/loggerfactory.h
-        include/cvs/logger/configtypes.h
-        include/cvs/logger/tools/fpslogger.h
+        include/cvs/logger/logging.hpp
+        include/cvs/logger/ilogger.hpp
+        include/cvs/logger/loggerfactory.hpp
+        include/cvs/logger/configtypes.hpp
+        include/cvs/logger/tools/fpslogger.hpp
 
-        src/default/defaultfactory.h
+        src/default/defaultfactory.hpp
 
         src/default/defaultfactory.cpp
         src/tools/fpslogger.cpp
@@ -72,7 +72,7 @@ target_sources(${PROJECT_NAME}
 
 generate_export_header(${PROJECT_NAME}
     EXPORT_FILE_NAME
-        ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.h
+        ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.hpp
     )
 
 target_link_libraries(${PROJECT_NAME}

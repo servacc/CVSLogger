@@ -1,7 +1,7 @@
-#include "../include/cvs/logger/tools/fpslogger.h"
+#include "../include/cvs/logger/tools/fpslogger.hpp"
 
-#include <cvs/logger/logging.h>
 #include <fmt/chrono.h>
+#include "../include/cvs/logger/logging.hpp"
 
 #include <list>
 #include <shared_mutex>

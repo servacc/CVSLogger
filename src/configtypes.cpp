@@ -1,3 +1,3 @@
-#include "../include/cvs/logger/configtypes.h"
+#include "../include/cvs/logger/configtypes.hpp"
 
 namespace cvs::logger {}  // namespace cvs::logger

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cvs/logger/loggerfactory.h>
+#include <cvs/logger/loggerfactory.hpp>
 
 #include <map>
 #include <optional>

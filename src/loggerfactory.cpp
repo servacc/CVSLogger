@@ -1,7 +1,7 @@
-#include "../include/cvs/logger/loggerfactory.h"
+#include "../include/cvs/logger/loggerfactory.hpp"
 
-#include "../include/cvs/logger/ilogger.h"
-#include "default/defaultfactory.h"
+#include "../include/cvs/logger/ilogger.hpp"
+#include "default/defaultfactory.hpp"
 
 #include <spdlog/spdlog.h>
 
