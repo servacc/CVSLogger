@@ -1,5 +1,5 @@
-#include "../include/cvs/logger/defaultfactory.h"
-#include "../include/cvs/logger/ilogger.h"
+#include "defaultfactory.hpp"
+#include "../include/cvs/logger/ilogger.hpp"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 #include <spdlog/sinks/systemd_sink.h>

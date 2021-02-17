@@ -23,12 +23,15 @@ option(CVSLOGGER_ENABLE_SYSD_BY_DEFAULT "Enable systemd sink by default" ON)
 
 include(GenerateExportHeader)
 
-if(CVSLOGGER_SHARED)
-    set(LIB_TYPE SHARED)
-else()
-    set(LIB_TYPE STATIC)
+if (NOT SPDLOG_FMT_EXTERNAL OR NOT SPDLOG_FMT_EXTERNAL_HO)
+    message(NOTICE "Set SPDLOG_FMT_EXTERNAL to ON. "
+        "FPSLogger is not compatible with internal fmt in spdlog version 1.8.2 and older.")
+    set(SPDLOG_FMT_EXTERNAL ON CACHE BOOL "")
 endif()
 
+if(NOT TARGET fmt::fmt)
+    find_package(fmt REQUIRED)
+endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 add_subdirectory(thirdparty/spdlog)
@@ -41,19 +44,26 @@ if(CVSLOGGER_OPENCV_IMG)
 endif()
 
 file( GLOB SRCS
-        include/cvs/logger/logging.h
-        include/cvs/logger/ilogger.h
-        include/cvs/logger/loggerfactory.h
-        include/cvs/logger/configtypes.h
-        include/cvs/logger/defaultfactory.h
+        include/cvs/logger/logging.hpp
+        include/cvs/logger/ilogger.hpp
+        include/cvs/logger/loggerfactory.hpp
+        include/cvs/logger/configtypes.hpp
+        include/cvs/logger/tools/fpslogger.hpp
 
-        src/defaultfactory.cpp
+        src/default/defaultfactory.hpp
+
+        src/default/defaultfactory.cpp
+        src/tools/fpslogger.cpp
         src/configtypes.cpp
         src/loggerfactory.cpp
         src/ilogger.cpp
     )
 
-add_library(${PROJECT_NAME} ${LIB_TYPE})
+if(CVSLOGGER_SHARED)
+    add_library(${PROJECT_NAME} SHARED)
+else()
+    add_library(${PROJECT_NAME} STATIC)
+endif()
 
 target_sources(${PROJECT_NAME}
     PRIVATE
@@ -62,7 +72,7 @@ target_sources(${PROJECT_NAME}
 
 generate_export_header(${PROJECT_NAME}
     EXPORT_FILE_NAME
-        ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.h
+        ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.hpp
     )
 
 target_link_libraries(${PROJECT_NAME}
@@ -86,7 +96,6 @@ target_compile_definitions(${PROJECT_NAME}
         $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:CVS_LOGGER_OPENCV_ENABLED>
         $<$<BOOL:${CVSLOGGER_ENABLE_STD_BY_DEFAULT}>:CVSLOGGER_STD_ENABLED>
         $<$<BOOL:${CVSLOGGER_ENABLE_SYSD_BY_DEFAULT}>:CVSLOGGER_SYSD_ENABLED>
-
     )
 
 set_target_properties(${PROJECT_NAME}
@@ -97,8 +106,8 @@ set_target_properties(${PROJECT_NAME}
 
 if(CVSLOGGER_TESTS)
     if(NOT TARGET gtest)
-        add_subdirectory(thirdparty/googletest)
         set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+        add_subdirectory(thirdparty/googletest)
     endif()
 
     add_subdirectory(test)

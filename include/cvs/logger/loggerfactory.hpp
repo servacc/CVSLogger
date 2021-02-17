@@ -5,7 +5,8 @@
 #include <functional>
 #include <memory>
 
-#include <cvs/logger/configtypes.h>
+#include <cvs/logger/configtypes.hpp>
+#include <cvs/logger/cvslogger_export.hpp>
 
 namespace cvs::logger {
 
