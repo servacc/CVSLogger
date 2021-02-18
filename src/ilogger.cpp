@@ -1,4 +1,4 @@
-#include "../include/cvs/logger/ilogger.h"
+#include "../include/cvs/logger/ilogger.hpp"
 
 #ifdef CVS_LOGGER_OPENCV_ENABLED
 

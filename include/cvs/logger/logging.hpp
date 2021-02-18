@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cvs/logger/ilogger.h>
-#include <cvs/logger/loggerfactory.h>
+#include <cvs/logger/ilogger.hpp>
+#include <cvs/logger/loggerfactory.hpp>
 
 #define LOG_TRACE(CH, ...)                            \
   if (CH && CH->isEnabled(cvs::logger::Level::trace)) \
