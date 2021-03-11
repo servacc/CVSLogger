@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(cvslogger_test)
+project(CVSLogger_test)
+
+find_package(PkgConfig REQUIRED)
+pkg_search_module(gtest_main REQUIRED IMPORTED_TARGET gtest_main)
 
 add_executable(${PROJECT_NAME})
 
@@ -12,8 +15,8 @@ target_sources(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
-        gtest_main
-        cvslogger
+        PkgConfig::gtest_main
+        CVSLogger
     )
 
 set_target_properties(${PROJECT_NAME}

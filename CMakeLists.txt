@@ -5,9 +5,7 @@ include(cmake/GitHelpers.cmake)
 
 git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 
-message(WARNING "TODO: Installing developer components has not been tested.")
-
-project(cvslogger
+project(CVSLogger
     VERSION 2.0.${GIT_COUNT}
     DESCRIPTION "CVS logger library (${REV_ID})")
 
@@ -33,17 +31,28 @@ if(NOT TARGET fmt::fmt)
     find_package(fmt REQUIRED)
 endif()
 
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-add_subdirectory(thirdparty/spdlog)
-
+find_package(spdlog)
 find_package(PkgConfig)
-pkg_check_modules(PC_SYSTEMD QUIET libsystemd)
+pkg_check_modules(systemd QUIET IMPORTED_TARGET libsystemd)
 
 if(CVSLOGGER_OPENCV_IMG)
     find_package(OpenCV REQUIRED)
 endif()
 
-file( GLOB SRCS
+
+if(CVSLOGGER_SHARED)
+    add_library(${PROJECT_NAME} SHARED)
+else()
+    add_library(${PROJECT_NAME} STATIC)
+endif()
+
+generate_export_header(${PROJECT_NAME}
+    EXPORT_FILE_NAME
+        ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.hpp
+    )
+
+target_sources(${PROJECT_NAME}
+      PRIVATE
         include/cvs/logger/logging.hpp
         include/cvs/logger/ilogger.hpp
         include/cvs/logger/loggerfactory.hpp
@@ -59,36 +68,20 @@ file( GLOB SRCS
         src/ilogger.cpp
     )
 
-if(CVSLOGGER_SHARED)
-    add_library(${PROJECT_NAME} SHARED)
-else()
-    add_library(${PROJECT_NAME} STATIC)
-endif()
-
-target_sources(${PROJECT_NAME}
-    PRIVATE
-        ${SRCS}
-    )
-
-generate_export_header(${PROJECT_NAME}
-    EXPORT_FILE_NAME
-        ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.hpp
-    )
 
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         spdlog::spdlog
+        PkgConfig::systemd
         $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_core>
         $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_imgcodecs>
-        systemd
     )
 
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/export>
-    PRIVATE
-        ${PC_SYSTEMD_INCLUDE_DIRS}
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
     )
 
 target_compile_definitions(${PROJECT_NAME}
@@ -105,10 +98,21 @@ set_target_properties(${PROJECT_NAME}
     )
 
 if(CVSLOGGER_TESTS)
-    if(NOT TARGET gtest)
-        set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
-        add_subdirectory(thirdparty/googletest)
-    endif()
-
     add_subdirectory(test)
 endif()
+
+include(install.cmake)
+
+cvsinstall(TARGETS ${PROJECT_NAME}
+           VERSION ${PROJECT_VERSION}
+           NAME ${PROJECT_NAME}
+           HEADERS
+             SUBFOLDER cvs/logger
+             FILES include/cvs/logger/logging.hpp
+                   include/cvs/logger/ilogger.hpp
+                   include/cvs/logger/loggerfactory.hpp
+                   include/cvs/logger/configtypes.hpp
+                   ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.hpp
+             SUBFOLDER cvs/logger/tools
+             FILES include/cvs/logger/tools/fpslogger.hpp
+             )
