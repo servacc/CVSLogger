@@ -3,7 +3,7 @@ include(CMakePackageConfigHelpers)
 
 macro(cvsinstall)
   set(options)
-  set(oneValueArgs VERSION NAME)
+  set(oneValueArgs VERSION NAME CONFIG)
   set(multiValueArgs TARGETS HEADERS)
   cmake_parse_arguments(CVSINSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -41,7 +41,7 @@ macro(cvsinstall)
     endif()
     list(SUBLIST CVSINSTALL_HEADERS ${INDEX} ${LENGHT} FILES_LIST)
 
-    install(FILES       ${FILES_LIST}
+    install(FILES ${FILES_LIST}
       DESTINATION ${HEADER_INSTALL_PATH}
       COMPONENT dev)
 
@@ -60,12 +60,12 @@ macro(cvsinstall)
     COMPONENT            bin)
 
   if(CVSINSTALL_ENABLE_DEV)
-    install(EXPORT      ${CVSINSTALL_NAME}Targets
-      FILE        ${CVSINSTALL_NAME}Targets.cmake
-      DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CVSINSTALL_NAME}
-      COMPONENT   dev)
+    install(EXPORT ${CVSINSTALL_NAME}Targets
+      FILE         ${CVSINSTALL_NAME}Targets.cmake
+      DESTINATION  ${CMAKE_INSTALL_LIBDIR}/cmake/${CVSINSTALL_NAME}
+      COMPONENT    dev)
 
-    configure_package_config_file(${CVSINSTALL_NAME}Config.cmake.in
+    configure_package_config_file(${CVSINSTALL_CONFIG}
       ${CMAKE_CURRENT_BINARY_DIR}/cvsinstall/${CVSINSTALL_NAME}Config.cmake
       INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CVSINSTALL_NAME}
       NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO)

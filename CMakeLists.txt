@@ -101,11 +101,12 @@ if(CVSLOGGER_TESTS)
     add_subdirectory(test)
 endif()
 
-include(install.cmake)
+include(cmake/CVSInstall.cmake)
 
 cvsinstall(TARGETS ${PROJECT_NAME}
            VERSION ${PROJECT_VERSION}
            NAME ${PROJECT_NAME}
+           CONFIG cmake/CVSLoggerConfig.cmake.in
            HEADERS
              SUBFOLDER cvs/logger
              FILES include/cvs/logger/logging.hpp
