@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cvs/logger/CVSLogger_export.hpp>
 #include <cvs/logger/configtypes.hpp>
+#include <cvs/logger/cvsloggerexport.hpp>
 
 #include <spdlog/logger.h>
 

@@ -54,10 +54,18 @@ macro(cvsinstall)
 
   install(TARGETS ${CVSINSTALL_TARGETS}
     EXPORT  ${CVSINSTALL_NAME}Targets
+    RUNTIME
+      DESTINATION ${CMAKE_INSTALL_BINDIR}
+      COMPONENT   bin
     LIBRARY
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CVSINSTALL_NAME}
-    DESTINATION          ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT            bin)
+      INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CVSINSTALL_NAME}
+      DESTINATION          ${CMAKE_INSTALL_LIBDIR}
+      COMPONENT            bin
+    ARCHIVE
+      INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${CVSINSTALL_NAME}
+      DESTINATION          ${CMAKE_INSTALL_LIBDIR}
+      COMPONENT            dev
+     )
 
   if(CVSINSTALL_ENABLE_DEV)
     install(EXPORT ${CVSINSTALL_NAME}Targets
@@ -79,4 +87,28 @@ macro(cvsinstall)
       DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${CVSINSTALL_NAME}
       COMPONENT   dev)
   endif()
+endmacro()
+
+macro(cvspackage)
+  set(options)
+  set(oneValueArgs PACKAGE_NAME)
+  set(multiValueArgs)
+  cmake_parse_arguments(CVSINSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+  set(CPACK_GENERATOR "DEB")
+
+  set(CPACK_DEBIAN_BIN_PACKAGE_NAME "${PACKAGE_NAME}")
+
+  set(CPACK_COMPONENT_UNSPECIFIED_GROUP "bin")
+  set(CPACK_COMPONENT_BIN_GROUP "bin")
+  set(CPACK_COMPONENT_DEV_GROUP "dev")
+
+  set(CPACK_DEBIAN_DEV_PACKAGE_DEPENDS "${PACKAGE_NAME} (= ${PROJECT_VERSION})")
+
+  set(CPACK_PACKAGE_CONTACT "CVS")
+
+  set(CPACK_DEB_COMPONENT_INSTALL ON)
+  set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+  include(CPack)
 endmacro()

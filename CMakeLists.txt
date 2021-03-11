@@ -7,14 +7,14 @@ git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 
 project(CVSLogger
   VERSION 3.0.${GIT_COUNT}
-  DESCRIPTION "CVS logger library (${REV_ID})")
+  DESCRIPTION "CVS logger library (${REV_ID})"
+  HOMEPAGE_URL "https://comvisionsys.ru")
+
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 option(CVSLOGGER_SHARED "" ON)
 option(CVSLOGGER_TESTS "" OFF)
 option(CVSLOGGER_OPENCV_IMG "" OFF)
-
-option(CVSLOGGER_INSTALL "" OFF)
-option(CVSLOGGER_DEV_INSTALL "" OFF)
 
 option(CVSLOGGER_ENABLE_STD_BY_DEFAULT "Enable stdout sink by default" OFF)
 option(CVSLOGGER_ENABLE_SYSD_BY_DEFAULT "Enable systemd sink by default" ON)
@@ -46,9 +46,14 @@ else()
   add_library(${PROJECT_NAME} STATIC)
 endif()
 
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+  SOVERSION ${PROJECT_VERSION_MAJOR}
+  )
+
 generate_export_header(${PROJECT_NAME}
   EXPORT_FILE_NAME
-    ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.hpp)
+    ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME_LOWER}export.hpp)
 
 target_sources(${PROJECT_NAME}
   PRIVATE
@@ -107,6 +112,8 @@ cvsinstall(TARGETS ${PROJECT_NAME}
       include/cvs/logger/ilogger.hpp
       include/cvs/logger/loggerfactory.hpp
       include/cvs/logger/configtypes.hpp
-      ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME}_export.hpp
+      ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME_LOWER}export.hpp
     SUBFOLDER cvs/logger/tools
     FILES include/cvs/logger/tools/fpslogger.hpp)
+
+cvspackage(PACKAGE_NAME ${PROJECT_NAME_LOWER})

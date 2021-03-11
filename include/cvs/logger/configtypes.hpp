@@ -3,7 +3,7 @@
 #include <memory>
 #include <string>
 
-#include <cvs/logger/CVSLogger_export.hpp>
+#include <cvs/logger/cvsloggerexport.hpp>
 
 namespace cvs::logger {
 
