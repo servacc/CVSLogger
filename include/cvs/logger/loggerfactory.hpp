@@ -5,6 +5,7 @@
 #include <functional>
 #include <memory>
 
+#include <cvs/logger/CVSLogger_export.hpp>
 #include <cvs/logger/configtypes.hpp>
 #include <cvs/logger/cvsloggerexport.hpp>
 
