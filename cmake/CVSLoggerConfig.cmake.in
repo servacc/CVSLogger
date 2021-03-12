@@ -1,6 +1,10 @@
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
 
+if(@CVSLOGGER_OPENCV_IMG@)
+  find_dependency(OpenCV)
+endif()
+
 find_dependency(spdlog)
 find_dependency(PkgConfig)
 pkg_check_modules(systemd QUIET IMPORTED_TARGET libsystemd)

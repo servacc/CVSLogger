@@ -13,8 +13,7 @@ project(CVSLogger
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
 option(CVSLOGGER_SHARED "" ON)
-option(CVSLOGGER_TESTS "" OFF)
-option(CVSLOGGER_OPENCV_IMG "" OFF)
+option(CVSLOGGER_OPENCV_IMG "" ON)
 
 option(CVSLOGGER_ENABLE_STD_BY_DEFAULT "Enable stdout sink by default" OFF)
 option(CVSLOGGER_ENABLE_SYSD_BY_DEFAULT "Enable systemd sink by default" ON)
@@ -96,9 +95,7 @@ set_target_properties(${PROJECT_NAME}
     CXX_STANDARD 20
     POSITION_INDEPENDENT_CODE ON)
 
-if(CVSLOGGER_TESTS)
-  add_subdirectory(test)
-endif()
+add_subdirectory(test)
 
 include(cmake/CVSInstall.cmake)
 

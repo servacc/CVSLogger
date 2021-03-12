@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.16)
 
+include(CTest)
+
+if(NOT BUILD_TESTING)
+    return()
+endif()
+
+enable_testing()
+
 project(CVSLogger_test)
 
 find_package(PkgConfig REQUIRED)
@@ -23,3 +31,5 @@ set_target_properties(${PROJECT_NAME}
     PROPERTIES
         CXX_STANDARD 20
     )
+
+add_test(LoggerTest ${PROJECT_NAME})
