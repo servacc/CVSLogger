@@ -32,12 +32,11 @@ endif()
 
 find_package(spdlog)
 find_package(PkgConfig)
-pkg_check_modules(systemd QUIET IMPORTED_TARGET libsystemd)
+pkg_check_modules(systemd REQUIRED IMPORTED_TARGET libsystemd)
 
 if(CVSLOGGER_OPENCV_IMG)
   find_package(OpenCV REQUIRED)
 endif()
-
 
 if(CVSLOGGER_SHARED)
   add_library(${PROJECT_NAME} SHARED)
