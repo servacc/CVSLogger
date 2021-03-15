@@ -74,8 +74,7 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
     spdlog::spdlog
     PkgConfig::systemd
-    $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_core>
-    $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_imgcodecs>)
+    $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_imgcodecs opencv_core>)
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC
