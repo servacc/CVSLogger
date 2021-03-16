@@ -1,14 +1,18 @@
 cmake_minimum_required(VERSION 3.16)
 
-include(GNUInstallDirs)
-include(cmake/GitHelpers.cmake)
+find_package(CVSCommon REQUIRED)
+list(APPEND CMAKE_MODULE_PATH "${CVSCOMMON_MODULE_PATH}")
 
-git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
+include(GNUInstallDirs)
+include(CVSGitHelpers)
+include(CVSCommon)
+
+cvs_git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 
 project(CVSLogger
   VERSION 3.0.${GIT_COUNT}
-  DESCRIPTION "CVS logger library (${REV_ID})"
-  HOMEPAGE_URL "https://comvisionsys.ru")
+  DESCRIPTION "CVS logger library (${GIT_DESCRIPTOR})"
+  HOMEPAGE_URL ${CVS_HOMEPAGE_URL})
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LOWER)
 
@@ -44,10 +48,7 @@ else()
   add_library(${PROJECT_NAME} STATIC)
 endif()
 
-set_target_properties(${PROJECT_NAME} PROPERTIES
-  VERSION ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-  SOVERSION ${PROJECT_VERSION_MAJOR}
-  )
+cvs_library_version()
 
 generate_export_header(${PROJECT_NAME}
   EXPORT_FILE_NAME
@@ -59,12 +60,14 @@ target_sources(${PROJECT_NAME}
     include/cvs/logger/ilogger.hpp
     include/cvs/logger/loggerfactory.hpp
     include/cvs/logger/configtypes.hpp
-    include/cvs/logger/tools/fpslogger.hpp
+#    include/cvs/logger/tools/fpslogger.hpp
+
+    src/logging.cpp
 
     src/default/defaultfactory.hpp
 
     src/default/defaultfactory.cpp
-    src/tools/fpslogger.cpp
+#    src/tools/fpslogger.cpp
     src/configtypes.cpp
     src/loggerfactory.cpp
     src/ilogger.cpp)
@@ -74,6 +77,7 @@ target_link_libraries(${PROJECT_NAME}
   PUBLIC
     spdlog::spdlog
     PkgConfig::systemd
+    cvs::CVSCommon
     "$<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_imgcodecs;opencv_core>")
 
 target_include_directories(${PROJECT_NAME}
@@ -95,20 +99,17 @@ set_target_properties(${PROJECT_NAME}
 
 add_subdirectory(test)
 
-include(cmake/CVSInstall.cmake)
+include(CVSInstall)
 
-cvsinstall(TARGETS ${PROJECT_NAME}
-  VERSION ${PROJECT_VERSION}
-  NAME ${PROJECT_NAME}
-  CONFIG cmake/CVSLoggerConfig.cmake.in
-  HEADERS
-    SUBFOLDER cvs/logger
+cvs_install(TARGETS_BIN ${PROJECT_NAME}
+  FILES_DEV
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/cvs/logger
     FILES include/cvs/logger/logging.hpp
       include/cvs/logger/ilogger.hpp
       include/cvs/logger/loggerfactory.hpp
       include/cvs/logger/configtypes.hpp
       ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME_LOWER}export.hpp
-    SUBFOLDER cvs/logger/tools
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/cvs/logger/tools
     FILES include/cvs/logger/tools/fpslogger.hpp)
 
-cvspackage(PACKAGE_NAME ${PROJECT_NAME_LOWER})
+cvs_package()
