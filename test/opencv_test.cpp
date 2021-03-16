@@ -1,12 +1,13 @@
 #include <gtest/gtest.h>
 
+#include <cvs/common/factory.hpp>
 #include <cvs/logger/logging.hpp>
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 
-using namespace cvs::logger;
+using namespace std::string_literals;
 
 namespace {
 
@@ -26,15 +27,20 @@ void drawRandomLines(cv::Mat& image, cv::RNG rng = {}) {
 }
 
 TEST(CVSLoggerTest, opencv) {
+  cvs::logger::initLoggers();
+
   cv::Mat mat(300, 300, CV_8UC3, cv::Scalar(0));
   drawRandomLines(mat);
 
-  LoggerFactory::configure("test.logger", std::tuple{LogImage::enable, Sinks::STDOUT});
+  auto logger = cvs::logger::createLogger("test.logger"s);
 
-  auto logger = LoggerFactory::getLogger("test.logger");
-  //  LOG_INFO(logger, "Save to {}", mat);
+  ASSERT_NE(nullptr, logger);
 
-  ASSERT_TRUE(std::filesystem::exists("/tmp/images/test.logger/2/0.png"));
+  LOG_INFO(logger, "Save to {}", mat);
+  LOG_INFO(logger, "Save to {}", mat);
+
+  ASSERT_TRUE(std::filesystem::exists("/tmp/cvslogger/test.logger/I/0.png"));
+  ASSERT_TRUE(std::filesystem::exists("/tmp/cvslogger/test.logger/I/1.png"));
 }
 
 }  // namespace

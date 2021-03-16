@@ -34,6 +34,7 @@ if(NOT TARGET fmt::fmt)
   find_package(fmt REQUIRED)
 endif()
 
+find_package(Boost)
 find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(systemd REQUIRED IMPORTED_TARGET libsystemd)
@@ -57,27 +58,18 @@ generate_export_header(${PROJECT_NAME}
 target_sources(${PROJECT_NAME}
   PRIVATE
     include/cvs/logger/logging.hpp
-    include/cvs/logger/ilogger.hpp
-    include/cvs/logger/loggerfactory.hpp
-    include/cvs/logger/configtypes.hpp
-#    include/cvs/logger/tools/fpslogger.hpp
+    include/cvs/logger/loggable.hpp
+    include/cvs/logger/tools/fpslogger.hpp
 
-    src/logging.cpp
-
-    src/default/defaultfactory.hpp
-
-    src/default/defaultfactory.cpp
-#    src/tools/fpslogger.cpp
-    src/configtypes.cpp
-    src/loggerfactory.cpp
-    src/ilogger.cpp)
-
+    src/tools/fpslogger.cpp
+    src/logging.cpp)
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
     spdlog::spdlog
     PkgConfig::systemd
     cvs::CVSCommon
+    Boost::boost
     "$<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_imgcodecs;opencv_core>")
 
 target_include_directories(${PROJECT_NAME}
