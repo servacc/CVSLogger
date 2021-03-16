@@ -32,7 +32,7 @@ TEST(CVSLoggerTest, opencv) {
   LoggerFactory::configure("test.logger", std::tuple{LogImage::enable, Sinks::STDOUT});
 
   auto logger = LoggerFactory::getLogger("test.logger");
-  LOG_INFO(logger, "Save to {}", mat);
+  //  LOG_INFO(logger, "Save to {}", mat);
 
   ASSERT_TRUE(std::filesystem::exists("/tmp/images/test.logger/2/0.png"));
 }

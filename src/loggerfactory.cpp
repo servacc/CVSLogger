@@ -5,9 +5,12 @@
 
 #include <spdlog/spdlog.h>
 
+#include <cvs/common/factory.hpp>
+
 #include <functional>
 
 using namespace cvs::logger;
+using namespace std::string_literals;
 
 namespace cvs::logger {
 
