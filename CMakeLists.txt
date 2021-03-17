@@ -30,7 +30,7 @@ if(NOT TARGET fmt::fmt)
   find_package(fmt REQUIRED)
 endif()
 
-find_package(spdlog)
+find_package(spdlog REQUIRED)
 find_package(PkgConfig)
 pkg_check_modules(systemd REQUIRED IMPORTED_TARGET libsystemd)
 
