@@ -31,7 +31,7 @@ if(NOT TARGET fmt::fmt)
 endif()
 
 find_package(spdlog REQUIRED)
-find_package(PkgConfig)
+find_package(PkgConfig REQUIRED)
 pkg_check_modules(systemd REQUIRED IMPORTED_TARGET libsystemd)
 
 if(CVSLOGGER_OPENCV_IMG)
