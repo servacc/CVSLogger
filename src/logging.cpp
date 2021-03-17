@@ -140,7 +140,18 @@ void createDefaultLogger(std::optional<cvs::common::Config> config) {
 
 void initLoggers(std::optional<common::Config> config) {
   registerLoggersInFactory();
-  createDefaultLogger(config);
+  createDefaultLogger(std::nullopt);
+
+  if (config) {
+    auto loggers = config->getChildren();
+    for (auto c : loggers) {
+      auto logger_conf = c.parse<LoggerConfig>();
+      if (logger_conf) {
+        auto logger = getOrCreateLogger(logger_conf->name);
+        configureLogger(logger, *logger_conf);
+      }
+    }
+  }
 }
 
 void registerLoggersInFactory() {
