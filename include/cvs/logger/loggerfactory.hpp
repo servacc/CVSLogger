@@ -6,7 +6,7 @@
 #include <memory>
 
 #include <cvs/logger/configtypes.hpp>
-#include <cvs/logger/cvslogger_export.hpp>
+#include <cvs/logger/cvsloggerexport.hpp>
 
 namespace cvs::logger {
 

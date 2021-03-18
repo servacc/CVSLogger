@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <cvs/logger/logging.h>
+#include <cvs/logger/logging.hpp>
 
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
