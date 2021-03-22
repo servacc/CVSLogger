@@ -2,6 +2,7 @@
 
 #include <spdlog/spdlog.h>
 #include <cvs/common/config.hpp>
+#include <cvs/logger/argumentpreprocessor.hpp>
 
 #ifdef CVS_LOGGER_OPENCV_ENABLED
 #include <filesystem>
@@ -21,18 +22,10 @@ void createDefaultLogger(std::optional<cvs::common::Config>);
 LoggerPtr createLogger(std::string, std::optional<cvs::common::Config> = std::nullopt);
 void      configureLogger(LoggerPtr, cvs::common::Config&);
 
-template <typename T>
-struct ProcessArg {
-  template <typename Arg>
-  static auto exec(LoggerPtr&, spdlog::level::level_enum, Arg&& arg) {
-    return std::forward<Arg>(arg);
-  }
-};
-
 #ifdef CVS_LOGGER_OPENCV_ENABLED
 
 template <>
-struct ProcessArg<cv::Mat> {
+struct ArgumentPreprocessor<cv::Mat> {
   static std::string exec(LoggerPtr&, spdlog::level::level_enum, const cv::Mat& arg);
 
   struct LoggerInfo {
@@ -54,9 +47,9 @@ void logHelper(LoggerPtr&                logger,
                spdlog::level::level_enum lvl,
                spdlog::string_view_t     fmt,
                Args&&... args) {
-  logger->log(
-      lvl, fmt,
-      (ProcessArg<std::remove_cvref_t<Args>>::exec(logger, lvl, std::forward<Args>(args)))...);
+  logger->log(lvl, fmt,
+              (ArgumentPreprocessor<std::remove_cvref_t<Args>>::exec(logger, lvl,
+                                                                     std::forward<Args>(args)))...);
 }
 
 }  // namespace cvs::logger

@@ -24,7 +24,7 @@ target_sources(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     PUBLIC
         PkgConfig::gtest_main
-        CVSLogger
+        cvs::CVSLogger_opencv
     )
 
 set_target_properties(${PROJECT_NAME}

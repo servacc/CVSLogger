@@ -3,7 +3,6 @@
 #include <cvs/common/factory.hpp>
 #include <cvs/logger/logging.hpp>
 
-#include <opencv2/highgui.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 

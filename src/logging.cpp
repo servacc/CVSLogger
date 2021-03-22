@@ -18,8 +18,6 @@ namespace {
 
 DECLARE_CONFIG(LoggerConfig,
                VALUE(name, std::string),
-               VALUE_OPTIONAL(log_img, int),
-               VALUE_OPTIONAL(img_path, std::string),
                VALUE_OPTIONAL(level, int),
                VALUE_OPTIONAL(pattern, std::string),
                VALUE_OPTIONAL(time_type, int),
@@ -78,14 +76,6 @@ cvs::logger::LoggerPtr getOrCreateLogger(std::string name) {
 }
 
 void configureLogger(cvs::logger::LoggerPtr& logger, LoggerConfig& config) {
-#ifdef CVS_LOGGER_OPENCV_ENABLED
-  if (config.log_img)
-    ProcessArg<cv::Mat>::save_info[config.name].lvl =
-        spdlog::level::level_enum(config.log_img.value());
-  if (config.img_path)
-    ProcessArg<cv::Mat>::save_info[config.name].path = *config.img_path;
-#endif
-
   if (config.pattern) {
     auto tt = config.time_type.value_or((int)spdlog::pattern_time_type::local);
     logger->set_pattern(*config.pattern, spdlog::pattern_time_type(tt));
@@ -173,38 +163,3 @@ void registerLoggersInFactory() {
 }
 
 }  // namespace cvs::logger
-
-#ifdef CVS_LOGGER_OPENCV_ENABLED
-
-namespace cvs::logger {
-
-std::map<std::string, ProcessArg<cv::Mat>::LoggerInfo> ProcessArg<cv::Mat>::save_info;
-
-spdlog::level::level_enum ProcessArg<cv::Mat>::default_save = spdlog::level::info;
-std::filesystem::path     ProcessArg<cv::Mat>::default_path =
-    std::filesystem::temp_directory_path() / "cvslogger";
-
-std::string ProcessArg<cv::Mat>::exec(LoggerPtr&                logger,
-                                      spdlog::level::level_enum lvl,
-                                      const cv::Mat&            arg) {
-  auto& info = save_info[logger->name()];
-
-  if (lvl < info.lvl.value_or(default_save))
-    return "Image{save disabled}";
-
-  auto save_path = std::filesystem::path(info.path.value_or(default_path)) / logger->name() /
-                   spdlog::level::to_short_c_str(lvl);
-  if (!std::filesystem::exists(save_path))
-    std::filesystem::create_directories(save_path);
-
-  auto filepath = save_path / (std::to_string(info.counter++) + ".png");
-
-  if (cv::imwrite(filepath.string(), arg))
-    return "cv::Mat(" + std::to_string(arg.cols) + "x" + std::to_string(arg.rows) + "){" +
-           filepath.string() + "}";
-  return "Image{can't save}";
-}
-
-}  // namespace cvs::logger
-
-#endif
