@@ -12,7 +12,30 @@ DECLARE_CONFIG(OpenCVLoggerConfig,
                VALUE_OPTIONAL(log_img, int),
                VALUE_OPTIONAL(img_path, std::string))
 
+std::string time_point_to_string(const std::chrono::system_clock::time_point& tp) {
+  using namespace std;
+  using namespace std::chrono;
+
+  auto         ttime_t = system_clock::to_time_t(tp);
+  auto         tp_sec  = system_clock::from_time_t(ttime_t);
+  milliseconds ms      = duration_cast<milliseconds>(tp - tp_sec);
+
+  std::tm* ttm = localtime(&ttime_t);
+
+  char date_time_format[] = "%Y.%m.%d-%H.%M.%S";
+
+  char time_str[] = "yyyy.mm.dd.HH-MM.SS.fff";
+
+  strftime(time_str, strlen(time_str), date_time_format, ttm);
+
+  string result(time_str);
+  result.append(".");
+  result.append(to_string(ms.count()));
+
+  return result;
 }
+
+}  // namespace
 
 namespace cvs::logger {
 
@@ -53,8 +76,10 @@ namespace cvs::logger {
 std::map<std::string, ArgumentPreprocessor<cv::Mat>::LoggerInfo>
     ArgumentPreprocessor<cv::Mat>::save_info;
 
-spdlog::level::level_enum ArgumentPreprocessor<cv::Mat>::default_save = spdlog::level::info;
-std::filesystem::path     ArgumentPreprocessor<cv::Mat>::default_path =
+const std::string ArgumentPreprocessor<cv::Mat>::subfolder =
+    time_point_to_string(std::chrono::system_clock::now());
+const spdlog::level::level_enum ArgumentPreprocessor<cv::Mat>::default_save = spdlog::level::info;
+const std::filesystem::path     ArgumentPreprocessor<cv::Mat>::default_path =
     std::filesystem::temp_directory_path() / "cvslogger";
 
 std::string ArgumentPreprocessor<cv::Mat>::exec(std::shared_ptr<spdlog::logger>& logger,
@@ -65,8 +90,8 @@ std::string ArgumentPreprocessor<cv::Mat>::exec(std::shared_ptr<spdlog::logger>&
   if (lvl < info.lvl.value_or(default_save))
     return "Image{save disabled}";
 
-  auto save_path = std::filesystem::path(info.path.value_or(default_path)) / logger->name() /
-                   spdlog::level::to_short_c_str(lvl);
+  auto save_path = std::filesystem::path(info.path.value_or(default_path)) / subfolder /
+                   logger->name() / spdlog::level::to_short_c_str(lvl);
   if (!std::filesystem::exists(save_path))
     std::filesystem::create_directories(save_path);
 

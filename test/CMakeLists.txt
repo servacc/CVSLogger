@@ -38,7 +38,7 @@ target_link_libraries(${PROJECT_NAME}_opencv
 
 target_compile_definitions(${PROJECT_NAME}_opencv
   PRIVATE
-    TEST_DIR="${CMAKE_CURRENT_BINARY_DIR}")
+    TEST_DIR="${CMAKE_CURRENT_BINARY_DIR}/logs")
 
 add_test(Cfg_test ${PROJECT_NAME})
 add_test(OpenCV_test ${PROJECT_NAME}_opencv)

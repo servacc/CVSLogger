@@ -26,8 +26,9 @@ struct ArgumentPreprocessor<cv::Mat> {
 
   static std::map<std::string, LoggerInfo> save_info;
 
-  static spdlog::level::level_enum default_save;
-  static std::filesystem::path     default_path;
+  static const std::string               subfolder;
+  static const spdlog::level::level_enum default_save;
+  static const std::filesystem::path     default_path;
 };
 
 }  // namespace cvs::logger

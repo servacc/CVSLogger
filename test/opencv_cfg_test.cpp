@@ -32,7 +32,8 @@ TEST(CVSLoggerTest, opencv_cfg) {
 
   cvs::logger::initLoggersAndOpenCVHelper(loggers.front());
 
-  auto logger_path = std::filesystem::path(TEST_DIR) / "test";
+  auto logger_path = std::filesystem::path(TEST_DIR) /
+                     cvs::logger::ArgumentPreprocessor<cv::Mat>::subfolder / "test";
   if (std::filesystem::exists(logger_path))
     EXPECT_TRUE(std::filesystem::remove_all(logger_path));
 
