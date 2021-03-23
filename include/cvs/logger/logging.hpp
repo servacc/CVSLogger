@@ -5,9 +5,7 @@
 #include <cvs/logger/argumentpreprocessor.hpp>
 
 #ifdef CVS_LOGGER_OPENCV_ENABLED
-#include <filesystem>
-#include <map>
-#include <opencv2/core/mat.hpp>
+#include <cvs/logger/opencvhelper.hpp>
 #endif
 
 namespace cvs::logger {
@@ -21,26 +19,6 @@ void createDefaultLogger(std::optional<cvs::common::Config>);
 
 LoggerPtr createLogger(std::string, std::optional<cvs::common::Config> = std::nullopt);
 void      configureLogger(LoggerPtr, cvs::common::Config&);
-
-#ifdef CVS_LOGGER_OPENCV_ENABLED
-
-template <>
-struct ArgumentPreprocessor<cv::Mat> {
-  static std::string exec(LoggerPtr&, spdlog::level::level_enum, const cv::Mat& arg);
-
-  struct LoggerInfo {
-    std::size_t                              counter = 0;
-    std::optional<spdlog::level::level_enum> lvl;
-    std::optional<std::filesystem::path>     path;
-  };
-
-  static std::map<std::string, LoggerInfo> save_info;
-
-  static spdlog::level::level_enum default_save;
-  static std::filesystem::path     default_path;
-};
-
-#endif
 
 template <typename... Args>
 void logHelper(LoggerPtr&                logger,

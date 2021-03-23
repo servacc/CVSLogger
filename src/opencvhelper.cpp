@@ -1,6 +1,7 @@
 #include "../include/cvs/logger/opencvhelper.hpp"
 
 #include <cvs/common/configbase.hpp>
+#include <cvs/logger/logging.hpp>
 
 #include <opencv2/imgcodecs.hpp>
 
@@ -15,7 +16,23 @@ DECLARE_CONFIG(OpenCVLoggerConfig,
 
 namespace cvs::logger {
 
-void confugureLoggerForOpenCV(std::shared_ptr<spdlog::logger>& logger, cvs::common::Config& cfg) {
+void initLoggersAndOpenCVHelper(std::optional<cvs::common::Config> config) {
+  initLoggers(config);
+
+  if (config) {
+    auto loggers = config->getChildren();
+    for (auto c : loggers) {
+      auto logger_conf = c.parse<OpenCVLoggerConfig>();
+      if (logger_conf) {
+        auto logger = createLogger(logger_conf->name);
+        confugureLoggerAndOpenCVHelper(logger, c);
+      }
+    }
+  }
+}
+
+void confugureLoggerAndOpenCVHelper(std::shared_ptr<spdlog::logger>& logger,
+                                    cvs::common::Config&             cfg) {
   auto cfg_struct_opt = cfg.parse<OpenCVLoggerConfig>();
   if (cfg_struct_opt) {
     if (cfg_struct_opt->log_img)
@@ -25,6 +42,8 @@ void confugureLoggerForOpenCV(std::shared_ptr<spdlog::logger>& logger, cvs::comm
       ArgumentPreprocessor<cv::Mat>::save_info[cfg_struct_opt->name].path =
           *cfg_struct_opt->img_path;
   }
+
+  configureLogger(logger, cfg);
 }
 
 }  // namespace cvs::logger

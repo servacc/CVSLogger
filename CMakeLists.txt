@@ -39,13 +39,10 @@ if(NOT TARGET fmt::fmt)
 endif()
 
 find_package(Boost)
+find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(systemd REQUIRED IMPORTED_TARGET libsystemd)
-
-if(CVSLOGGER_OPENCV_IMG)
-  find_package(OpenCV REQUIRED)
-endif()
 
 if(CVSLOGGER_SHARED)
   add_library(${PROJECT_NAME} SHARED)
@@ -100,7 +97,7 @@ target_sources(${PROJECT_NAME}_opencv
 target_link_libraries(${PROJECT_NAME}_opencv
   PUBLIC
     cvs::CVSLogger
-    "$<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_imgcodecs;opencv_core>")
+    opencv_imgcodecs opencv_core)
 
 target_include_directories(${PROJECT_NAME}_opencv
   PUBLIC
@@ -110,7 +107,7 @@ target_include_directories(${PROJECT_NAME}_opencv
 
 target_compile_definitions(${PROJECT_NAME}_opencv
   PUBLIC
-    $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:CVS_LOGGER_OPENCV_ENABLED>)
+    CVS_LOGGER_OPENCV_ENABLED)
 
 add_subdirectory(test)
 
