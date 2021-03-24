@@ -7,6 +7,7 @@ if(CVSLOGGER_OPENCV_IMG)
   find_dependency(OpenCV)
 endif()
 
+find_dependency(CVSCommon)
 find_dependency(spdlog)
 find_dependency(PkgConfig)
 if(@PROJECT_NAME@_FIND_REQUIRED)

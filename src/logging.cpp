@@ -16,12 +16,12 @@ using namespace std::string_literals;
 
 namespace {
 
-DECLARE_CONFIG(LoggerConfig,
-               VALUE(name, std::string),
-               VALUE_OPTIONAL(level, int),
-               VALUE_OPTIONAL(pattern, std::string),
-               VALUE_OPTIONAL(time_type, int),
-               VALUE_OPTIONAL(sink, int))
+CVSCFG_DECLARE_CONFIG(LoggerConfig,
+                      CVSCFG_VALUE(name, std::string),
+                      CVSCFG_VALUE_OPTIONAL(level, int),
+                      CVSCFG_VALUE_OPTIONAL(pattern, std::string),
+                      CVSCFG_VALUE_OPTIONAL(time_type, int),
+                      CVSCFG_VALUE_OPTIONAL(sink, int))
 
 using StdoutSink  = spdlog::sinks::stdout_color_sink_mt;
 using SystemdSink = spdlog::sinks::systemd_sink_st;

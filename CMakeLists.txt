@@ -1,9 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
-find_package(CVSCommon REQUIRED)
+find_package(CVSCommonCMakeHelpers REQUIRED)
 list(APPEND CMAKE_MODULE_PATH "${CVSCOMMON_MODULE_PATH}")
 
-include(GNUInstallDirs)
 include(CVSGitHelpers)
 include(CVSCommon)
 
@@ -13,6 +12,8 @@ project(CVSLogger
   VERSION 3.0.${GIT_COUNT}
   DESCRIPTION "CVS logger library (${GIT_DESCRIPTOR})"
   HOMEPAGE_URL ${CVS_HOMEPAGE_URL})
+
+include(GNUInstallDirs)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -38,7 +39,7 @@ if(NOT TARGET fmt::fmt)
   find_package(fmt REQUIRED)
 endif()
 
-find_package(Boost)
+find_package(CVSCommon REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)

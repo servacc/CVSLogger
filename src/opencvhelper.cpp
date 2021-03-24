@@ -7,10 +7,10 @@
 
 namespace {
 
-DECLARE_CONFIG(OpenCVLoggerConfig,
-               VALUE(name, std::string),
-               VALUE_OPTIONAL(log_img, int),
-               VALUE_OPTIONAL(img_path, std::string))
+CVSCFG_DECLARE_CONFIG(OpenCVLoggerConfig,
+                      CVSCFG_VALUE(name, std::string),
+                      CVSCFG_VALUE_OPTIONAL(log_img, int),
+                      CVSCFG_VALUE_OPTIONAL(img_path, std::string))
 
 std::string time_point_to_string(const std::chrono::system_clock::time_point& tp) {
   using namespace std;
