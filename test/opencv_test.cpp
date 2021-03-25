@@ -38,8 +38,11 @@ TEST(CVSLoggerTest, opencv) {
   LOG_INFO(logger, "Save to {}", mat);
   LOG_INFO(logger, "Save to {}", mat);
 
-  ASSERT_TRUE(std::filesystem::exists("/tmp/cvslogger/test.logger/I/0.png"));
-  ASSERT_TRUE(std::filesystem::exists("/tmp/cvslogger/test.logger/I/1.png"));
+  auto logger_path = cvs::logger::ArgumentPreprocessor<cv::Mat>::default_path /
+                     cvs::logger::ArgumentPreprocessor<cv::Mat>::subfolder / "test.logger";
+
+  ASSERT_TRUE(std::filesystem::exists(logger_path / "I" / "0.png"));
+  ASSERT_TRUE(std::filesystem::exists(logger_path / "I" / "1.png"));
 }
 
 }  // namespace
