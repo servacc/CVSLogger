@@ -3,15 +3,12 @@ cmake_minimum_required(VERSION 3.16)
 find_package(CVSCommonCMakeHelpers REQUIRED)
 list(APPEND CMAKE_MODULE_PATH "${CVSCOMMON_MODULE_PATH}")
 
-include(CVSGitHelpers)
 include(CVSCommon)
 
-cvs_git_description(GIT_DESCRIPTOR GIT_TAG GIT_COUNT)
 
-project(CVSLogger
-  VERSION 3.0.${GIT_COUNT}
-  DESCRIPTION "CVS logger library (${GIT_DESCRIPTOR})"
-  HOMEPAGE_URL ${CVS_HOMEPAGE_URL})
+project(CVSLogger CVS_PROJECT
+                  VERSION 3.0.0
+                  DESCRIPTION "CVS logger library")
 
 include(GNUInstallDirs)
 
@@ -50,9 +47,9 @@ if(CVSLOGGER_SHARED)
 else()
   add_library(${PROJECT_NAME} STATIC)
 endif()
-add_library(cvs::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
-cvs_library_version()
+cvs_add_to_alias(${PROJECT_NAME})
+cvs_library_version(${PROJECT_NAME})
 
 generate_export_header(${PROJECT_NAME}
   EXPORT_FILE_NAME
