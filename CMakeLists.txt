@@ -5,7 +5,6 @@ list(APPEND CMAKE_MODULE_PATH "${CVSCOMMON_MODULE_PATH}")
 
 include(CVSCommon)
 
-
 project(CVSLogger CVS_PROJECT
                   VERSION 3.0.0
                   DESCRIPTION "CVS logger library")
@@ -50,6 +49,11 @@ endif()
 
 cvs_add_to_alias(${PROJECT_NAME})
 cvs_library_version(${PROJECT_NAME})
+cvs_create_version_file(NAME ${PROJECT_NAME}
+                        MAJOR ${PROJECT_VERSION_MAJOR}
+                        MINOR ${PROJECT_VERSION_MINOR}
+                        PATCH ${PROJECT_VERSION_PATCH}
+                        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generate/cvs/logger")
 
 generate_export_header(${PROJECT_NAME}
   EXPORT_FILE_NAME
@@ -76,6 +80,7 @@ target_include_directories(${PROJECT_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/export>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generate>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>)
 
 target_compile_definitions(${PROJECT_NAME}
@@ -97,12 +102,6 @@ target_link_libraries(${PROJECT_NAME}_opencv
     cvs::CVSLogger
     opencv_imgcodecs opencv_core)
 
-target_include_directories(${PROJECT_NAME}_opencv
-  PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/export>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>)
-
 target_compile_definitions(${PROJECT_NAME}_opencv
   PUBLIC
     CVS_LOGGER_OPENCV_ENABLED)
@@ -120,6 +119,7 @@ cvs_install(TARGETS_BIN ${PROJECT_NAME}
       include/cvs/logger/tools/fpslogger.hpp
       include/cvs/logger/argumentpreprocessor.hpp
       ${CMAKE_CURRENT_BINARY_DIR}/export/cvs/logger/${PROJECT_NAME_LOWER}export.hpp
+      ${CMAKE_CURRENT_BINARY_DIR}/generate/cvs/logger/version.hpp
       include/cvs/logger/opencvhelper.hpp
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}/cvs/logger/tools
     FILES include/cvs/logger/tools/fpslogger.hpp)
