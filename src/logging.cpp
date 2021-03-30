@@ -5,11 +5,7 @@
 #include <spdlog/spdlog.h>
 
 #include <cvs/common/configbase.hpp>
-#include <cvs/common/factory.hpp>
-
-#ifdef CVS_LOGGER_OPENCV_ENABLED
-#include <opencv2/imgcodecs.hpp>
-#endif
+#include <cvs/common/staticfactory.hpp>
 
 using namespace cvs::logger;
 using namespace std::string_literals;
@@ -114,8 +110,8 @@ void configureLogger(LoggerPtr logger, cvs::common::Config& cfg) {
 
 LoggerPtr createLogger(std::string name, std::optional<common::Config> config) {
   if (config)
-    return common::Factory::create<LoggerPtr>("cvslogger"s, name, *config).value();
-  return common::Factory::create<LoggerPtr>("cvslogger"s, name).value();
+    return common::StaticFactory::create<LoggerPtr>("cvslogger"s, name, *config).value();
+  return common::StaticFactory::create<LoggerPtr>("cvslogger"s, name).value();
 }
 
 void createDefaultLogger(std::optional<cvs::common::Config> config) {
@@ -145,13 +141,14 @@ void initLoggers(std::optional<common::Config> config) {
 }
 
 void registerLoggersInFactory() {
-  common::Factory::registrate<LoggerPtr(std::string)>("cvslogger"s, getOrCreateLogger);
+  common::StaticFactory::registrate<LoggerPtr(std::string)>("cvslogger"s, getOrCreateLogger);
 
-  common::Factory::registrate<LoggerPtr(cvs::common::Config)>(
+  common::StaticFactory::registrate<LoggerPtr(cvs::common::Config)>(
       "cvslogger"s, [](cvs::common::Config cfg) -> LoggerPtr {
         auto cfg_struct_opt = cfg.parse<LoggerConfig>();
         if (cfg_struct_opt) {
-          auto logger_opt = common::Factory::create<LoggerPtr>("cvslogger"s, cfg_struct_opt->name);
+          auto logger_opt =
+              common::StaticFactory::create<LoggerPtr>("cvslogger"s, cfg_struct_opt->name);
           if (!logger_opt)
             return {};
           configureLogger(*logger_opt, *cfg_struct_opt);
