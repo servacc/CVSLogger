@@ -10,7 +10,7 @@ namespace cvs::logger {
 template <typename T>
 class Loggable {
  public:
-  explicit Loggable(std::string name = boost::core::demangle(typeid(T).name()),
+  explicit Loggable(const std::string& name = boost::core::demangle(typeid(T).name()),
                     std::optional<cvs::common::Config> cfg = std::nullopt) {
     log = createLogger(name, cfg);
   }
@@ -18,8 +18,8 @@ class Loggable {
 
   void configureLogger(cvs::common::Config& cfg) { cvs::logger::configureLogger(logger(), cfg); }
 
-  LoggerPtr&       logger() { return log; }
-  const LoggerPtr& logger() const { return log; }
+  [[nodiscard]] LoggerPtr&       logger() { return log; }
+  [[nodiscard]] const LoggerPtr& logger() const { return log; }
 
  private:
   LoggerPtr log;

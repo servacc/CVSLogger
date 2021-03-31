@@ -22,47 +22,44 @@ CVSCFG_DECLARE_CONFIG(LoggerConfig,
 using StdoutSink  = spdlog::sinks::stdout_color_sink_mt;
 using SystemdSink = spdlog::sinks::systemd_sink_st;
 
-enum class Sinks : int {
-  NOSINK  = 0,
+enum Sink {
+  NO_SINK = 0,
   STDOUT  = 1,
   SYSTEMD = 2,
 };
 
-constexpr bool  operator&(Sinks s0, Sinks s1) { return (int(s0) & int(s1)) != 0; }
-constexpr Sinks operator|(Sinks s0, Sinks s1) { return Sinks{int(s0) | int(s1)}; }
+const std::string name_in_factory = "cvs.logger";
 
-static Sinks default_sinks =
+constexpr auto default_sinks =
 #ifdef CVSLOGGER_STD_ENABLED
 #ifdef CVSLOGGER_SYSD_ENABLED
-    Sinks::SYSTEMD | Sinks::STDOUT;
+    Sink::SYSTEMD | Sink::STDOUT;
 #else
-    Sinks::STDOUT;
+    Sink::STDOUT;
 #endif
 #else
 #ifdef CVSLOGGER_SYSD_ENABLED
-    Sinks::SYSTEMD;
+    Sink::SYSTEMD;
 #else
-    Sinks::NOSINK;
+    Sink::NO_SINK;
 #endif
 #endif
 
 template <typename SinkType>
-auto createSink(bool enable) {
+auto createSink(bool enable_by_default) {
   auto sink = std::make_shared<SinkType>();
-  if (!enable)
+  if (!enable_by_default)
     sink->set_level(spdlog::level::off);
   return sink;
 }
 
-cvs::logger::LoggerPtr createLogger(std::string name) {
-  std::vector<spdlog::sink_ptr> sinks;
-  sinks.push_back(createSink<StdoutSink>(default_sinks & Sinks::STDOUT));
-  sinks.push_back(createSink<SystemdSink>(default_sinks & Sinks::SYSTEMD));
-
-  return std::make_shared<spdlog::logger>(name, std::begin(sinks), std::end(sinks));
+cvs::logger::LoggerPtr createLogger(const std::string& name) {
+  return std::make_shared<spdlog::logger>(
+      name, spdlog::sinks_init_list{createSink<StdoutSink>(default_sinks & Sink::STDOUT),
+                                    createSink<SystemdSink>(default_sinks & Sink::SYSTEMD)});
 }
 
-cvs::logger::LoggerPtr getOrCreateLogger(std::string name) {
+cvs::logger::LoggerPtr getOrCreateLogger(const std::string& name) {
   auto logger = spdlog::get(name);
   if (!logger) {
     logger = createLogger(name);
@@ -81,17 +78,17 @@ void configureLogger(cvs::logger::LoggerPtr& logger, LoggerConfig& config) {
   logger->set_level(level);
 
   if (config.sink) {
-    auto sinks_flags = Sinks(*config.sink);
+    auto sinks_flags = Sink(*config.sink);
     auto sinks       = logger->sinks();
     for (auto& s : sinks) {
       auto std_sink = std::dynamic_pointer_cast<StdoutSink>(s);
       if (std_sink) {
-        std_sink->set_level(sinks_flags & Sinks::STDOUT ? level : spdlog::level::off);
+        std_sink->set_level(sinks_flags & Sink::STDOUT ? level : spdlog::level::off);
         continue;
       }
       auto sys_sink = std::dynamic_pointer_cast<SystemdSink>(s);
       if (sys_sink) {
-        sys_sink->set_level(sinks_flags & Sinks::SYSTEMD ? level : spdlog::level::off);
+        sys_sink->set_level(sinks_flags & Sink::SYSTEMD ? level : spdlog::level::off);
         continue;
       }
     }
@@ -102,16 +99,24 @@ void configureLogger(cvs::logger::LoggerPtr& logger, LoggerConfig& config) {
 
 namespace cvs::logger {
 
-void configureLogger(LoggerPtr logger, cvs::common::Config& cfg) {
+bool configureLogger(LoggerPtr logger, cvs::common::Config& cfg) {
   auto cfg_struct_opt = cfg.parse<LoggerConfig>();
-  if (cfg_struct_opt)
+  if (cfg_struct_opt) {
     configureLogger(logger, *cfg_struct_opt);
+    return true;
+  }
+
+  return false;
 }
 
-LoggerPtr createLogger(std::string name, std::optional<common::Config> config) {
+LoggerPtr createLogger(const std::string& name, std::optional<common::Config> config) {
   if (config)
-    return common::StaticFactory::create<LoggerPtr>("cvslogger"s, name, *config).value();
-  return common::StaticFactory::create<LoggerPtr>("cvslogger"s, name).value();
+    return common::StaticFactory::create<LoggerPtr, std::string, const std::string&>(
+               name_in_factory, name, *config)
+        .value();
+  return common::StaticFactory::create<LoggerPtr, std::string, const std::string&>(name_in_factory,
+                                                                                   name)
+      .value();
 }
 
 void createDefaultLogger(std::optional<cvs::common::Config> config) {
@@ -124,31 +129,40 @@ void createDefaultLogger(std::optional<cvs::common::Config> config) {
   }
 }
 
-void initLoggers(std::optional<common::Config> config) {
+bool initLoggers(std::optional<common::Config> config) {
   registerLoggersInFactory();
   createDefaultLogger(std::nullopt);
 
+  bool result = true;
   if (config) {
-    auto loggers = config->getChildren();
-    for (auto c : loggers) {
-      auto logger_conf = c.parse<LoggerConfig>();
-      if (logger_conf) {
-        auto logger = getOrCreateLogger(logger_conf->name);
-        configureLogger(logger, *logger_conf);
+    auto loggers_list = config->getChildren("loggers");
+    for (auto& iter : loggers_list) {
+      auto loggers = iter.getChildren();
+      for (auto channel_conf : loggers) {
+        auto logger_conf = channel_conf.parse<LoggerConfig>();
+        if (logger_conf) {
+          auto logger = getOrCreateLogger(logger_conf->name);
+          configureLogger(logger, *logger_conf);
+        } else
+          result = false;
       }
     }
   }
+
+  return result;
 }
 
 void registerLoggersInFactory() {
-  common::StaticFactory::registrate<LoggerPtr(std::string)>("cvslogger"s, getOrCreateLogger);
+  common::StaticFactory::registrate<LoggerPtr(const std::string&)>(name_in_factory,
+                                                                   getOrCreateLogger);
 
-  common::StaticFactory::registrate<LoggerPtr(cvs::common::Config)>(
-      "cvslogger"s, [](cvs::common::Config cfg) -> LoggerPtr {
+  common::StaticFactory::registrate<LoggerPtr(cvs::common::Config&)>(
+      name_in_factory, [](cvs::common::Config& cfg) -> LoggerPtr {
         auto cfg_struct_opt = cfg.parse<LoggerConfig>();
         if (cfg_struct_opt) {
           auto logger_opt =
-              common::StaticFactory::create<LoggerPtr>("cvslogger"s, cfg_struct_opt->name);
+              common::StaticFactory::create<LoggerPtr, std::string, const std::string&>(
+                  name_in_factory, cfg_struct_opt->name);
           if (!logger_opt)
             return {};
           configureLogger(*logger_opt, *cfg_struct_opt);

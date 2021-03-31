@@ -83,11 +83,7 @@ TEST(LoggerTest, config_array) {
 
   cvs::common::Config root_cfg(root);
 
-  auto loggers = root_cfg.getChildren("loggers");
-
-  ASSERT_EQ(1, loggers.size());
-
-  cvs::logger::initLoggers(loggers.front());
+  ASSERT_TRUE(cvs::logger::initLoggers(root_cfg));
 
   LOG_GLOB_TRACE("DEF {} {}", 0, 1);
   LOG_GLOB_DEBUG("DEF {} {}", 0, 1);
