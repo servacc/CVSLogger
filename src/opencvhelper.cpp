@@ -48,13 +48,13 @@ void initLoggersAndOpenCVHelper(std::optional<cvs::common::Config> config) {
       auto logger_conf = c.parse<OpenCVLoggerConfig>();
       if (logger_conf) {
         auto logger = createLogger(logger_conf->name);
-        confugureLoggerAndOpenCVHelper(logger, c);
+        configureLoggerAndOpenCVHelper(logger, c);
       }
     }
   }
 }
 
-void confugureLoggerAndOpenCVHelper(std::shared_ptr<spdlog::logger>& logger,
+void configureLoggerAndOpenCVHelper(std::shared_ptr<spdlog::logger>& logger,
                                     cvs::common::Config&             cfg) {
   auto cfg_struct_opt = cfg.parse<OpenCVLoggerConfig>();
   if (cfg_struct_opt) {
