@@ -153,23 +153,22 @@ bool initLoggers(std::optional<common::Config> config) {
 }
 
 void registerLoggersInFactory() {
-  common::StaticFactory::registrate<LoggerPtr(const std::string&)>(name_in_factory,
-                                                                   getOrCreateLogger);
+  common::StaticFactory::registerType<LoggerPtr(const std::string&)>(name_in_factory,
+                                                                     getOrCreateLogger);
 
-  common::StaticFactory::registrate<LoggerPtr(cvs::common::Config&)>(
+  common::StaticFactory::registerType<LoggerPtr(cvs::common::Config&)>(
       name_in_factory, [](cvs::common::Config& cfg) -> LoggerPtr {
         auto cfg_struct_opt = cfg.parse<LoggerConfig>();
-        if (cfg_struct_opt) {
-          auto logger_opt =
-              common::StaticFactory::create<LoggerPtr, std::string, const std::string&>(
-                  name_in_factory, cfg_struct_opt->name);
-          if (!logger_opt)
-            return {};
-          configureLogger(*logger_opt, *cfg_struct_opt);
-          return *logger_opt;
-        }
+        if (!cfg_struct_opt)
+          return {};
 
-        return {};
+        auto logger_opt = common::StaticFactory::create<LoggerPtr, std::string, const std::string&>(
+            name_in_factory, cfg_struct_opt->name);
+        if (!logger_opt)
+          return {};
+
+        configureLogger(*logger_opt, *cfg_struct_opt);
+        return *logger_opt;
       });
 }
 

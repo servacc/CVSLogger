@@ -3,6 +3,8 @@
 #include <cvs/common/configbase.hpp>
 #include <cvs/logger/logging.hpp>
 
+#include <fmt/chrono.h>
+
 #include <opencv2/imgcodecs.hpp>
 
 namespace {
@@ -11,29 +13,6 @@ CVSCFG_DECLARE_CONFIG(OpenCVLoggerConfig,
                       CVSCFG_VALUE(name, std::string),
                       CVSCFG_VALUE_OPTIONAL(log_img, int),
                       CVSCFG_VALUE_OPTIONAL(img_path, std::string))
-
-std::string time_point_to_string(const std::chrono::system_clock::time_point& tp) {
-  using namespace std;
-  using namespace std::chrono;
-
-  auto         ttime_t = system_clock::to_time_t(tp);
-  auto         tp_sec  = system_clock::from_time_t(ttime_t);
-  milliseconds ms      = duration_cast<milliseconds>(tp - tp_sec);
-
-  std::tm* ttm = localtime(&ttime_t);
-
-  char date_time_format[] = "%Y.%m.%d-%H.%M.%S";
-
-  char time_str[] = "yyyy.mm.dd.HH-MM.SS.fff";
-
-  strftime(time_str, strlen(time_str), date_time_format, ttm);
-
-  string result(time_str);
-  result.append(".");
-  result.append(to_string(ms.count()));
-
-  return result;
-}
 
 }  // namespace
 
@@ -76,21 +55,15 @@ namespace cvs::logger {
 std::map<std::string, ArgumentPreprocessor<cv::Mat>::LoggerInfo>
     ArgumentPreprocessor<cv::Mat>::save_info;
 
-const std::string ArgumentPreprocessor<cv::Mat>::subfolder =
-    time_point_to_string(std::chrono::system_clock::now());
-const spdlog::level::level_enum ArgumentPreprocessor<cv::Mat>::default_save = spdlog::level::info;
-const std::filesystem::path     ArgumentPreprocessor<cv::Mat>::default_path =
-    std::filesystem::temp_directory_path() / "cvslogger";
-
 std::string ArgumentPreprocessor<cv::Mat>::exec(std::shared_ptr<spdlog::logger>& logger,
                                                 spdlog::level::level_enum        lvl,
                                                 const cv::Mat&                   arg) {
   auto& info = save_info[logger->name()];
 
-  if (lvl < info.lvl.value_or(default_save))
+  if (lvl < info.lvl.value_or(defaultSave()))
     return "Image{save disabled}";
 
-  auto save_path = std::filesystem::path(info.path.value_or(default_path)) / subfolder /
+  auto save_path = std::filesystem::path(info.path.value_or(defaultPath())) / subfolder() /
                    logger->name() / spdlog::level::to_short_c_str(lvl);
   if (!std::filesystem::exists(save_path))
     std::filesystem::create_directories(save_path);
@@ -101,6 +74,25 @@ std::string ArgumentPreprocessor<cv::Mat>::exec(std::shared_ptr<spdlog::logger>&
     return "cv::Mat(" + std::to_string(arg.cols) + "x" + std::to_string(arg.rows) + "){" +
            filepath.string() + "}";
   return "Image{can't save}";
+}
+
+const std::string& ArgumentPreprocessor<cv::Mat>::subfolder() {
+  static const std::string name = fmt::format(
+      "{:%Y.%m.%d-%H.%M.%S}",
+      fmt::localtime(std::chrono::system_clock::to_time_t(std::chrono::system_clock::now())));
+
+  return name;
+}
+
+spdlog::level::level_enum ArgumentPreprocessor<cv::Mat>::defaultSave() {
+  static const spdlog::level::level_enum default_save = spdlog::level::info;
+  return default_save;
+}
+
+const std::filesystem::path& ArgumentPreprocessor<cv::Mat>::defaultPath() {
+  static const std::filesystem::path default_path =
+      std::filesystem::temp_directory_path() / "cvslogger";
+  return default_path;
 }
 
 }  // namespace cvs::logger

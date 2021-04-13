@@ -18,6 +18,10 @@ struct ArgumentPreprocessor<cv::Mat> {
                           spdlog::level::level_enum,
                           const cv::Mat& arg);
 
+  static const std::string&           subfolder();
+  static spdlog::level::level_enum    defaultSave();
+  static const std::filesystem::path& defaultPath();
+
   struct LoggerInfo {
     std::size_t                              counter = 0;
     std::optional<spdlog::level::level_enum> lvl;
@@ -25,10 +29,6 @@ struct ArgumentPreprocessor<cv::Mat> {
   };
 
   static std::map<std::string, LoggerInfo> save_info;
-
-  static const std::string               subfolder;
-  static const spdlog::level::level_enum default_save;
-  static const std::filesystem::path     default_path;
 };
 
 }  // namespace cvs::logger
