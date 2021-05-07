@@ -10,7 +10,8 @@
 namespace cvs::logger {
 
 void initLoggersAndOpenCVHelper(std::optional<cvs::common::Config> = std::nullopt);
-void configureLoggerAndOpenCVHelper(std::shared_ptr<spdlog::logger>& logger, cvs::common::Config&);
+void configureLoggerAndOpenCVHelper(const std::shared_ptr<spdlog::logger>& logger,
+                                    cvs::common::Config&);
 
 template <>
 struct ArgumentPreprocessor<cv::Mat> {

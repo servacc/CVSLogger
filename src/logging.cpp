@@ -68,7 +68,7 @@ cvs::logger::LoggerPtr getOrCreateLogger(const std::string& name) {
   return logger;
 }
 
-void configureLogger(cvs::logger::LoggerPtr& logger, LoggerConfig& config) {
+void configureLogger(const cvs::logger::LoggerPtr& logger, LoggerConfig& config) {
   if (config.pattern) {
     auto tt = config.time_type.value_or((int)spdlog::pattern_time_type::local);
     logger->set_pattern(*config.pattern, spdlog::pattern_time_type(tt));
@@ -99,7 +99,7 @@ void configureLogger(cvs::logger::LoggerPtr& logger, LoggerConfig& config) {
 
 namespace cvs::logger {
 
-bool configureLogger(LoggerPtr logger, cvs::common::Config& cfg) {
+bool configureLogger(const LoggerPtr& logger, cvs::common::Config& cfg) {
   auto cfg_struct_opt = cfg.parse<LoggerConfig>();
   if (cfg_struct_opt) {
     configureLogger(logger, *cfg_struct_opt);
