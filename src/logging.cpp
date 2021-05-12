@@ -109,7 +109,7 @@ bool configureLogger(const LoggerPtr& logger, cvs::common::Config& cfg) {
   return false;
 }
 
-LoggerPtr createLogger(const std::string& name, std::optional<common::Config> config) {
+LoggerPtr createLogger(const std::string& name, const std::optional<common::Config>& config) {
   if (config)
     return common::StaticFactory::create<LoggerPtr, std::string, const std::string&>(
                name_in_factory, name, *config)

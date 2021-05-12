@@ -17,7 +17,8 @@ bool initLoggers(std::optional<cvs::common::Config> = std::nullopt);
 void registerLoggersInFactory();
 void createDefaultLogger(std::optional<cvs::common::Config>);
 
-LoggerPtr createLogger(const std::string&, std::optional<cvs::common::Config> = std::nullopt);
+LoggerPtr createLogger(const std::string&,
+                       const std::optional<cvs::common::Config>& = std::nullopt);
 bool      configureLogger(const LoggerPtr&, cvs::common::Config&);
 
 namespace detail {
