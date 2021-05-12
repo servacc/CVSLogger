@@ -19,7 +19,7 @@ void createDefaultLogger(std::optional<cvs::common::Config>);
 
 LoggerPtr createLogger(const std::string&,
                        const std::optional<cvs::common::Config>& = std::nullopt);
-bool      configureLogger(const LoggerPtr&, cvs::common::Config&);
+bool      configureLogger(spdlog::logger&, cvs::common::Config&);
 
 namespace detail {
 

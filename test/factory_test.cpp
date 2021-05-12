@@ -33,7 +33,7 @@ TEST_P(DefaultLoggerTest, configure) {
 
   cvs::common::Config cfg(*logger_json);
 
-  cvs::logger::configureLogger(spdlog::default_logger(), cfg);
+  cvs::logger::configureLogger(*spdlog::default_logger(), cfg);
 
   LOG_GLOB_TRACE("Test {} {}", 0, 1);
   LOG_GLOB_DEBUG("Test {} {}", 0, 1);

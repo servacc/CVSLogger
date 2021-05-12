@@ -68,18 +68,18 @@ cvs::logger::LoggerPtr getOrCreateLogger(const std::string& name) {
   return logger;
 }
 
-void configureLogger(const cvs::logger::LoggerPtr& logger, LoggerConfig& config) {
+void configureLogger(spdlog::logger& logger, LoggerConfig& config) {
   if (config.pattern) {
     auto tt = config.time_type.value_or((int)spdlog::pattern_time_type::local);
-    logger->set_pattern(*config.pattern, spdlog::pattern_time_type(tt));
+    logger.set_pattern(*config.pattern, spdlog::pattern_time_type(tt));
   }
 
   auto level = spdlog::level::level_enum(config.level.value_or(spdlog::level::info));
-  logger->set_level(level);
+  logger.set_level(level);
 
   if (config.sink) {
     auto sinks_flags = Sink(*config.sink);
-    auto sinks       = logger->sinks();
+    auto sinks       = logger.sinks();
     for (auto& s : sinks) {
       auto std_sink = std::dynamic_pointer_cast<StdoutSink>(s);
       if (std_sink) {
@@ -99,7 +99,7 @@ void configureLogger(const cvs::logger::LoggerPtr& logger, LoggerConfig& config)
 
 namespace cvs::logger {
 
-bool configureLogger(const LoggerPtr& logger, cvs::common::Config& cfg) {
+bool configureLogger(spdlog::logger& logger, cvs::common::Config& cfg) {
   auto cfg_struct_opt = cfg.parse<LoggerConfig>();
   if (cfg_struct_opt) {
     configureLogger(logger, *cfg_struct_opt);
@@ -125,7 +125,7 @@ void createDefaultLogger(std::optional<cvs::common::Config> config) {
 
   if (config) {
     if (auto c = config->parse<LoggerConfig>(); c)
-      configureLogger(default_logger, *c);
+      configureLogger(*default_logger, *c);
   }
 }
 
@@ -142,7 +142,7 @@ bool initLoggers(std::optional<common::Config> config) {
         auto logger_conf = channel_conf.parse<LoggerConfig>();
         if (logger_conf) {
           auto logger = getOrCreateLogger(logger_conf->name);
-          configureLogger(logger, *logger_conf);
+          configureLogger(*logger, *logger_conf);
         } else
           result = false;
       }
@@ -167,7 +167,7 @@ void registerLoggersInFactory() {
         if (!logger_opt)
           return {};
 
-        configureLogger(*logger_opt, *cfg_struct_opt);
+        configureLogger(**logger_opt, *cfg_struct_opt);
         return *logger_opt;
       });
 }
