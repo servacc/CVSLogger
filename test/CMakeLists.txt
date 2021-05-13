@@ -16,20 +16,29 @@ pkg_search_module(gtest_main REQUIRED IMPORTED_TARGET gtest_main)
 add_executable(${PROJECT_NAME})
 
 target_sources(${PROJECT_NAME}
-    PRIVATE
-        factory_test.cpp
-        $<$<BOOL:${CVSLOGGER_OPENCV_IMG}>:opencv_test.cpp>
-    )
+  PRIVATE
+    factory_test.cpp)
 
 target_link_libraries(${PROJECT_NAME}
-    PUBLIC
-        PkgConfig::gtest_main
-        CVSLogger
-    )
+  PUBLIC
+    PkgConfig::gtest_main
+    cvs::CVSLogger)
 
-set_target_properties(${PROJECT_NAME}
-    PROPERTIES
-        CXX_STANDARD 20
-    )
+add_executable(${PROJECT_NAME}_opencv)
 
-add_test(LoggerTest ${PROJECT_NAME})
+target_sources(${PROJECT_NAME}_opencv
+  PRIVATE
+    opencv_test.cpp
+    opencv_cfg_test.cpp)
+
+target_link_libraries(${PROJECT_NAME}_opencv
+  PUBLIC
+    PkgConfig::gtest_main
+    cvs::CVSLogger_opencv)
+
+target_compile_definitions(${PROJECT_NAME}_opencv
+  PRIVATE
+    TEST_DIR="${CMAKE_CURRENT_BINARY_DIR}/logs")
+
+add_test(Cfg_test ${PROJECT_NAME})
+add_test(OpenCV_test ${PROJECT_NAME}_opencv)

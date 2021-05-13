@@ -1,10 +1,13 @@
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
 
-if(@CVSLOGGER_OPENCV_IMG@)
+option(CVSLOGGER_OPENCV_IMG "Enable preprocessor for cv::Mat" ON)
+
+if(CVSLOGGER_OPENCV_IMG)
   find_dependency(OpenCV)
 endif()
 
+find_dependency(CVSCommon)
 find_dependency(spdlog)
 find_dependency(PkgConfig)
 if(@PROJECT_NAME@_FIND_REQUIRED)

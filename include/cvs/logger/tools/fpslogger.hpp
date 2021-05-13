@@ -1,13 +1,14 @@
 #pragma once
 
 #include <chrono>
+#include <cvs/logger/loggable.hpp>
 #include <memory>
 #include <string_view>
 #include <tuple>
 
 namespace cvs::logger::tools {
 
-class FpsLogger {
+class FpsLogger : public Loggable<FpsLogger> {
   class Private;
 
  public:
@@ -20,7 +21,8 @@ class FpsLogger {
     std::size_t total_cnt;
   };
 
-  FpsLogger(std::string_view name = "cvs.logger.tools.fsplogger");
+  FpsLogger(std::string_view                   name = "cvs.logger.tools.fsplogger",
+            std::optional<cvs::common::Config> cfg  = std::nullopt);
   virtual ~FpsLogger();
 
   void   setRo(double);

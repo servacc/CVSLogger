@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <cvs/common/configbase.hpp>
+#include <cvs/common/factory.hpp>
 #include <cvs/logger/logging.hpp>
 
 #include <list>
@@ -7,65 +9,111 @@
 #include <tuple>
 
 using namespace cvs::logger;
+using namespace std::string_literals;
 
-TEST(DefraultFactoryTest, defalt_logger) {
-  LoggerFactory::configure(LoggerFactory::default_logger_name,
-                           std::tuple{Level::trace, Sinks::STDOUT | Sinks::SYSTEMD});
+namespace {
 
-  LOG_GLOB_TRACE("Test 0");
-  LOG_GLOB_DEBUG("Test 0");
-  LOG_GLOB_INFO("Test 0");
-  LOG_GLOB_WARN("Test 0");
-  LOG_GLOB_ERROR("Test 0");
+class DefaultLoggerTest : public ::testing::TestWithParam<std::string> {
+ public:
+  static void SetUpTestSuite() { cvs::logger::initLoggers(); }
+};
 
-  LoggerFactory::configure(LoggerFactory::default_logger_name, std::tuple{Level::info});
+TEST_P(DefaultLoggerTest, configure) {
+  std::string config_json = GetParam();
 
-  LOG_GLOB_TRACE("Test 1");
-  LOG_GLOB_DEBUG("Test 1");
-  LOG_GLOB_INFO("Test 1");
-  LOG_GLOB_WARN("Test 1");
-  LOG_GLOB_ERROR("Test 1");
+  std::stringstream ss;
+  ss << config_json;
+  boost::property_tree::ptree root;
 
-  LoggerFactory::configure(LoggerFactory::default_logger_name,
-                           std::tuple{Level::err, Sinks::STDOUT});
+  ASSERT_NO_THROW(boost::property_tree::read_json(ss, root));
 
-  LOG_GLOB_TRACE("Test 2");
-  LOG_GLOB_DEBUG("Test 2");
-  LOG_GLOB_INFO("Test 2");
-  LOG_GLOB_WARN("Test 2");
-  LOG_GLOB_ERROR("Test 2");
+  std::optional<boost::property_tree::ptree> logger_json =
+      cvs::common::utils::boostOptionalToStd(root.get_child_optional("logger"));
+  ASSERT_TRUE(logger_json);
+
+  cvs::common::Config cfg(*logger_json);
+
+  cvs::logger::configureLogger(*spdlog::default_logger(), cfg);
+
+  LOG_GLOB_TRACE("Test {} {}", 0, 1);
+  LOG_GLOB_DEBUG("Test {} {}", 0, 1);
+  LOG_GLOB_INFO("Test {} {}", 0, 1);
+  LOG_GLOB_WARN("Test {} {}", 0, 1);
+  LOG_GLOB_ERROR("Test {} {}", 0, 1);
 }
 
-TEST(DefraultFactoryTest, logger) {
-  LoggerFactory::configure("test-logger", std::tuple{Level::trace, Sinks::STDOUT | Sinks::SYSTEMD});
+INSTANTIATE_TEST_SUITE_P(LoggerTest,
+                         DefaultLoggerTest,
+                         ::testing::Values(
+                             R"json(
+{
+  "logger": {
+    "name": "",
+    "level": "0",
+    "sink": "1"
+  }
+})json",
+                             R"json(
+{
+  "logger": {
+    "name": "",
+    "level": "2",
+    "sink": "1"
+  }
+})json"));
 
-  auto logger = LoggerFactory::getLogger("test-logger");
+TEST(LoggerTest, config_array) {
+  std::string config_json = R"json(
+{
+  "item1" : { "name": "1" },
+  "loggers": [
+    { "name": "", "level": "0", "sink": "1" },
+    { "name": "test0", "level": "0", "sink": "1" },
+    { "name": "test1", "level": "1", "sink": "1" },
+    { "name": "test2", "level": "2", "sink": "1" }
+  ],
+  "item1" : { "name": "2" }
+})json";
 
-  LOG_TRACE(logger, "Test 0");
-  LOG_DEBUG(logger, "Test 0");
-  LOG_INFO(logger, "Test 0");
-  LOG_WARN(logger, "Test 0");
-  LOG_ERROR(logger, "Test 0");
+  std::stringstream ss;
+  ss << config_json;
+  boost::property_tree::ptree root;
+
+  ASSERT_NO_THROW(boost::property_tree::read_json(ss, root));
+
+  cvs::common::Config root_cfg(root);
+
+  ASSERT_TRUE(cvs::logger::initLoggers(root_cfg));
+
+  LOG_GLOB_TRACE("DEF {} {}", 0, 1);
+  LOG_GLOB_DEBUG("DEF {} {}", 0, 1);
+  LOG_GLOB_INFO("DEF {} {}", 0, 1);
+  LOG_GLOB_WARN("DEF {} {}", 0, 1);
+  LOG_GLOB_ERROR("DEF {} {}", 0, 1);
+
+  auto logger0 = createLogger("test0");
+
+  LOG_TRACE(logger0, "test0 {} {}", 0, 1);
+  LOG_DEBUG(logger0, "test0 {} {}", 0, 1);
+  LOG_INFO(logger0, "test0 {} {}", 0, 1);
+  LOG_WARN(logger0, "test0 {} {}", 0, 1);
+  LOG_ERROR(logger0, "test0 {} {}", 0, 1);
+
+  auto logger1 = createLogger("test1");
+
+  LOG_TRACE(logger1, "test1 {} {}", 0, 1);
+  LOG_DEBUG(logger1, "test1 {} {}", 0, 1);
+  LOG_INFO(logger1, "test1 {} {}", 0, 1);
+  LOG_WARN(logger1, "test1 {} {}", 0, 1);
+  LOG_ERROR(logger1, "test1 {} {}", 0, 1);
+
+  auto logger2 = createLogger("test2");
+
+  LOG_TRACE(logger2, "test2 {} {}", 0, 1);
+  LOG_DEBUG(logger2, "test2 {} {}", 0, 1);
+  LOG_INFO(logger2, "test2 {} {}", 0, 1);
+  LOG_WARN(logger2, "test2 {} {}", 0, 1);
+  LOG_ERROR(logger2, "test2 {} {}", 0, 1);
 }
 
-TEST(DefraultFactoryTest, regex) {
-  LoggerFactory::configure(Regex{"test.*"},
-                           std::tuple{Pattern{"[%=10n] [%=7l] %v", TimeType::utc}, Sinks::STDOUT});
-  LoggerFactory::configure("test.trace", std::tuple{Level::trace}, "test.info",
-                           std::tuple{Level::info});
-
-  auto logger0 = LoggerFactory::getLogger("test.trace");
-  auto logger1 = LoggerFactory::getLogger("test.info");
-
-  LOG_TRACE(logger0, "test");
-  LOG_DEBUG(logger0, "test");
-  LOG_INFO(logger0, "test");
-  LOG_WARN(logger0, "test");
-  LOG_ERROR(logger0, "test");
-
-  LOG_TRACE(logger1, "test");
-  LOG_DEBUG(logger1, "test");
-  LOG_INFO(logger1, "test");
-  LOG_WARN(logger1, "test");
-  LOG_ERROR(logger1, "test");
-}
+}  // namespace

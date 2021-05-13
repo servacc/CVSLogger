@@ -37,7 +37,6 @@ class FpsLogger::Private {
   double smma_fps = 0;
   double ro       = 0.1;
 
-  cvs::logger::LoggerPtr    logger;
   mutable std::shared_mutex update_mutex;
 };
 
@@ -65,12 +64,11 @@ duration FpsLogger::Private::avrTime(const duration& dur, std::size_t counter) {
 
 namespace cvs::logger::tools {
 
-FpsLogger::FpsLogger(std::string_view name)
-    : m(std::make_shared<Private>()) {
+FpsLogger::FpsLogger(std::string_view name, std::optional<cvs::common::Config> cfg)
+    : Loggable<FpsLogger>(std::string{name}, cfg)
+    , m(std::make_shared<Private>()) {
   if (name.empty())
     LOG_GLOB_CRITICAL("The FpsLogger name must not be empty.");
-
-  m->logger = cvs::logger::LoggerFactory::getLogger(name);
 }
 
 FpsLogger::~FpsLogger() { stop(); }
@@ -98,7 +96,7 @@ void FpsLogger::stop() {
     m->started = false;
 
     if (m->autolog) {
-      LOG_INFO(m->logger, "{} frames for {}. Average FPS: {:.2f}.", m->total_cnt,
+      LOG_INFO(logger(), "{} frames for {}. Average FPS: {:.2f}.", m->total_cnt,
                duration_cast<std::chrono::milliseconds>(m->total_dur), fps());
     }
   }
@@ -136,13 +134,13 @@ void FpsLogger::newFrame(time_point frame_time) {
     m->update(last_dur);
 
     if (m->autolog) {
-      LOG_TRACE(m->logger, "Frame {}. Current FPS {:.2f}. SMMA FPS {:.2f}. Mean FPS {:.2f}",
+      LOG_TRACE(logger(), "Frame {}. Current FPS {:.2f}. SMMA FPS {:.2f}. Mean FPS {:.2f}",
                 m->total_cnt, m->last_fps, m->smma_fps, fps());
 
       m->report_dur += last_dur;
       ++m->report_cnt;
       if (m->report_dur >= m->report_period) {
-        LOG_DEBUG(m->logger, "FPS for last {} frames is {:.2f}.", m->report_cnt,
+        LOG_DEBUG(logger(), "FPS for last {} frames is {:.2f}.", m->report_cnt,
                   m->fps(m->report_dur, m->report_cnt));
 
         m->report_cnt = 0;
