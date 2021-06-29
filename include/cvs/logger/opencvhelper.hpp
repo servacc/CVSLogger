@@ -14,7 +14,7 @@ void configureLoggerAndOpenCVHelper(spdlog::logger& logger, cvs::common::Config&
 
 template <>
 struct ArgumentPreprocessor<cv::Mat> {
-  static std::string exec(std::shared_ptr<spdlog::logger>&,
+  static std::string exec(const std::shared_ptr<spdlog::logger>&,
                           spdlog::level::level_enum,
                           const cv::Mat& arg);
 
