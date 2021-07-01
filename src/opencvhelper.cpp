@@ -54,9 +54,9 @@ namespace cvs::logger {
 std::map<std::string, ArgumentPreprocessor<cv::Mat>::LoggerInfo>
     ArgumentPreprocessor<cv::Mat>::save_info;
 
-std::string ArgumentPreprocessor<cv::Mat>::exec(std::shared_ptr<spdlog::logger>& logger,
-                                                spdlog::level::level_enum        lvl,
-                                                const cv::Mat&                   arg) {
+std::string ArgumentPreprocessor<cv::Mat>::exec(const std::shared_ptr<spdlog::logger>& logger,
+                                                spdlog::level::level_enum              lvl,
+                                                const cv::Mat&                         arg) {
   auto& info = save_info[logger->name()];
 
   if (lvl < info.lvl.value_or(defaultSave()))

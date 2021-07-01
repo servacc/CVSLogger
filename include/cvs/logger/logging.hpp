@@ -24,7 +24,7 @@ bool      configureLogger(spdlog::logger&, cvs::common::Config&);
 namespace detail {
 
 template <typename... Args>
-void logHelper(LoggerPtr&                logger,
+void logHelper(const LoggerPtr&          logger,
                spdlog::level::level_enum lvl,
                spdlog::string_view_t     fmt,
                Args&&... args) {
