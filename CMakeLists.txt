@@ -1,13 +1,19 @@
 cmake_minimum_required(VERSION 3.16)
 
+set(CVS_IS_SUBMODULE TRUE)
+
+if(NOT TARGET cvs::CVSCommon)
 find_package(CVSCommonCMakeHelpers REQUIRED)
 list(APPEND CMAKE_MODULE_PATH "${CVSCOMMON_MODULE_PATH}")
 
 include(CVSCommon)
+set(CVS_IS_SUBMODULE FALSE)
+endif()
 
 project(CVSLogger CVS_PROJECT
                   VERSION 3.0.0
-                  DESCRIPTION "CVS logger library")
+									DESCRIPTION "CVS logger library"
+									LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -35,7 +41,6 @@ if(NOT TARGET fmt::fmt)
   find_package(fmt REQUIRED)
 endif()
 
-find_package(CVSCommon REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(PkgConfig REQUIRED)
@@ -44,8 +49,10 @@ pkg_check_modules(systemd REQUIRED IMPORTED_TARGET libsystemd)
 if(CVSLOGGER_SHARED)
   add_library(${PROJECT_NAME} SHARED)
 else()
-  add_library(${PROJECT_NAME} STATIC)
+	add_library(${PROJECT_NAME} STATIC)
 endif()
+
+add_library(cvs::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 cvs_add_to_alias(${PROJECT_NAME})
 cvs_library_version(${PROJECT_NAME})
@@ -109,7 +116,9 @@ target_compile_definitions(${PROJECT_NAME}_opencv
 
 add_subdirectory(test)
 
+if(NOT CVS_IS_SUBMODULE)
 include(CVSInstall)
+endif()
 
 cvs_install(TARGETS_BIN ${PROJECT_NAME}
   TARGETS_DEV ${PROJECT_NAME}_opencv
