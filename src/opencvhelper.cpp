@@ -22,12 +22,15 @@ void initLoggersAndOpenCVHelper(std::optional<cvs::common::Config> config) {
   initLoggers(config);
 
   if (config) {
-    auto loggers = config->getChildren();
-    for (auto c : loggers) {
-      auto logger_conf = c.parse<OpenCVLoggerConfig>();
-      if (logger_conf) {
-        auto logger = createLogger(logger_conf->name);
-        configureLoggerAndOpenCVHelper(*logger, c);
+    auto loggers_list = config->getChildren("loggers");
+    for (auto& iter : loggers_list) {
+      auto loggers = iter.getChildren();
+      for (auto c : loggers) {
+        auto logger_conf = c.parse<OpenCVLoggerConfig>();
+        if (logger_conf) {
+          auto logger = createLogger(logger_conf->name);
+          configureLoggerAndOpenCVHelper(*logger, c);
+        }
       }
     }
   }
