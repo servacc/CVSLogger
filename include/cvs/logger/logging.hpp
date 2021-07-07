@@ -8,6 +8,22 @@
 #include <cvs/logger/opencvhelper.hpp>
 #endif
 
+// Support formatting for any std::ostream-printable type
+template <typename T>
+concept OstreamPrintable = requires(std::ostream& stream, T v) {
+  { stream << v } -> std::convertible_to<decltype(stream)>;
+};
+
+template <OstreamPrintable T, typename Char>
+struct fmt::formatter<T, Char> : formatter<std::string_view, Char> {
+  template <typename FormatContext>
+  auto format(T v, FormatContext& ctx) {
+    std::stringstream ss;
+    ss << v;
+    return formatter<std::string_view>::format(ss.str(), ctx);
+  }
+};
+
 namespace cvs::logger {
 
 using LoggerPtr = std::shared_ptr<spdlog::logger>;
