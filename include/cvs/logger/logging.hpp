@@ -15,12 +15,12 @@ concept OstreamPrintable = requires(std::ostream& stream, T v) {
 };
 
 template <OstreamPrintable T, typename Char>
-struct fmt::formatter<T, Char> : formatter<std::string_view, Char> {
+struct fmt::formatter<T, Char> : formatter<std::basic_string_view<Char>, Char> {
   template <typename FormatContext>
   auto format(T v, FormatContext& ctx) {
     std::stringstream ss;
     ss << v;
-    return formatter<std::string_view>::format(ss.str(), ctx);
+    return formatter<std::basic_string_view<Char>>::format(ss.str(), ctx);
   }
 };
 
