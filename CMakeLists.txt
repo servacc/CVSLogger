@@ -89,7 +89,7 @@ target_compile_definitions(${PROJECT_NAME}
     $<$<BOOL:${CVSLOGGER_ENABLE_STD_BY_DEFAULT}>:CVSLOGGER_STD_ENABLED>
     $<$<BOOL:${CVSLOGGER_ENABLE_SYSD_BY_DEFAULT}>:CVSLOGGER_SYSD_ENABLED>)
 
-add_library(${PROJECT_NAME}_opencv STATIC)
+add_library(${PROJECT_NAME}_opencv SHARED)
 add_library(cvs::${PROJECT_NAME}_opencv ALIAS ${PROJECT_NAME}_opencv)
 
 target_sources(${PROJECT_NAME}_opencv
