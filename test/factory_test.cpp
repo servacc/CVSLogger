@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include <cvs/common/configbase.hpp>
 #include <cvs/common/factory.hpp>
 #include <cvs/logger/logging.hpp>
 
+#include <boost/property_tree/json_parser.hpp>
+
 #include <list>
-#include <regex>
 #include <tuple>
 
 using namespace cvs::logger;
@@ -18,6 +18,15 @@ class DefaultLoggerTest : public ::testing::TestWithParam<std::string> {
   static void SetUpTestSuite() { cvs::logger::initLoggers(); }
 };
 
+template <typename InnerType,
+          typename ResultType =
+              std::conditional_t<std::is_reference_v<InnerType>,
+                                 std::reference_wrapper<std::remove_reference_t<InnerType> >,
+                                 InnerType> >
+std::optional<ResultType> boostOptionalToStd(boost::optional<InnerType>&& value) {
+  return value ? std::make_optional<ResultType>(value.get()) : std::nullopt;
+}
+
 TEST_P(DefaultLoggerTest, configure) {
   std::string config_json = GetParam();
 
@@ -28,7 +37,7 @@ TEST_P(DefaultLoggerTest, configure) {
   ASSERT_NO_THROW(boost::property_tree::read_json(ss, root));
 
   std::optional<boost::property_tree::ptree> logger_json =
-      cvs::common::utils::boostOptionalToStd(root.get_child_optional("logger"));
+      boostOptionalToStd(root.get_child_optional("logger"));
   ASSERT_TRUE(logger_json);
 
   cvs::common::Config cfg(*logger_json);
